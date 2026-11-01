@@ -1856,6 +1856,14 @@
         },
         hint() {
           if (locked) return;
+          if (cur >= 11 && mist < 2) {
+            return toast(
+              tt(
+                "Hint terkunci. Buktikan kamu sudah mencoba.",
+                "Hint locked. Prove you have actually tried.",
+              ),
+            );
+          }
           if (cur >= 10 && Math.random() < 0.25) {
             say("Hint.exe has stopped working…", "laugh");
             return toast("⚠ Error 404: hint not found");
