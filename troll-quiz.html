@@ -2731,24 +2731,30 @@
           },
         },
         {
-          t: "Escape the quiz",
-          g: "Impossible",
-          i: "Escape! Use the EXIT.",
-          h: "That EXIT button looks fake. Where is a real way out?",
+          t: "Jangan tekan tombol merah",
+          g: "Hard",
+          i: "Jangan tekan tombol merah sebelum hitungan selesai. Tekan saat tombol berubah hijau!",
+          h: "Tunggu sampai tulisan berubah menjadi SEKARANG. Menekan tombol merah terlalu cepat berarti kalah.",
           s() {
-            st.innerHTML =
-              doorHTML("dr", 84, 40, 22, 36) +
-              o('<div class="sign">EXIT</div>', 84, 12, 0) +
-              o('<button class="b rd">EXIT</button>', 36, 62, 0, "ex");
-            drag($("#ex"), {
-              end: (e, mv) => {
-                if (!mv) lose("That EXIT is totally fake!");
-                else if (near(e, $("#dr"))) {
-                  openDoor("dr");
-                  win("You escaped\u2026 the quiz?!");
-                }
-              },
-            });
+            let left = 4;
+            st.innerHTML = `<div class="q" id="waitmsg" style="top:18%;font-size:7cqmin">Tunggu ${left}…</div>${o('<button class="b rd big" id="redwait">MERAH</button>', 50, 58)}`;
+            const msg = $("#waitmsg");
+            const button = $("#redwait");
+            const countdown = setInterval(() => {
+              if (locked) return;
+              left--;
+              if (left > 0) {
+                msg.textContent = `Tunggu ${left}…`;
+                return;
+              }
+              clearInterval(countdown);
+              button.className = "b gr big";
+              button.textContent = "SEKARANG!";
+              msg.textContent = "Sekarang tekan!";
+              button.onclick = () => win("Tepat waktu! Tombol merah akhirnya aman.");
+            }, 1000);
+            clean.push(() => clearInterval(countdown));
+            button.onclick = () => lose("Kepagian! Tombolnya masih merah 😈");
           },
         },
       ];
@@ -4001,6 +4007,92 @@
         const t = KK[(i - 11) % KK.length];
         L.push(t == "riddle" ? rid(i) : MK[t] ? MK[t](i) : old(i, t));
       }
+      L[99] = Zf(
+        100,
+        "BOSS TERAKHIR: Ingatan troll",
+        "Kalahkan boss dengan menekan warna sesuai urutan. Ikuti petunjuk satu per satu!",
+        "Ikuti petunjuk warna di layar. Lima pilihan benar dan kamu menang.",
+        () => {
+          const colors = [
+            ["MERAH", "rd"],
+            ["KUNING", "or"],
+            ["HIJAU", "gr"],
+            ["BIRU", "cy"],
+          ],
+          sequence = [2, 0, 3, 1, 2, 3],
+          boss = "🧌";
+          let step = 0;
+          const draw = () => {
+            if (locked) return;
+            st.innerHTML =
+              `<div class="q" style="top:8%;font-size:7cqmin">${boss} ${step + 1}/${sequence.length}</div><div class="q" id="bossPrompt" style="top:23%;font-size:5.5cqmin">Tekan ${colors[sequence[step]][0]}</div><div class="g4" style="top:43%">` +
+              colors
+                .map(
+                  (c, k) =>
+                    `<button class="b ${c[1]}" data-boss="${k}">${c[0]}</button>`,
+                )
+                .join("") +
+              "</div>";
+            $$(".g4 .b").forEach(
+              (button) =>
+                (button.onclick = () => {
+                  if (+button.dataset.boss !== sequence[step])
+                    return lose("Boss bilang: salah warna! Mulai lagi 😈");
+                  step++;
+                  sTap();
+                  if (step === sequence.length)
+                    return win("Boss dikalahkan! Kamu resmi raja troll.");
+                  say(`Benar! Sekarang ${colors[sequence[step]][0]}.`, "shock");
+                  draw();
+                }),
+            );
+          };
+          draw();
+        },
+        40,
+      );
+      const SPEC_SUBJECTS = [
+        "kucing kosmik", "pisang licin", "robot pemalu", "naga mini", "es krim nakal",
+        "ayam detektif", "alien kos", "bebek ninja", "hantu ramah", "ikan berkacamata",
+        "monyet jujur", "semut raksasa", "sapi DJ", "kelinci cepat", "gurita chef",
+        "panda lapar", "katak penyanyi", "jerapah pendek", "zebra belang", "koala ngantuk",
+        "burung pos", "kambing gunung", "rubah licik", "serigala baik", "siput turbo",
+        "lebah sibuk", "kupu-kupu bingung", "cacing senyum", "kepiting joget", "udang merah",
+        "paus kecil", "hiu vegetarian", "lumba-lumba usil", "penyu santai", "ubur-ubur neon",
+        "bintang laut", "gurame galak", "lele pemberani", "ikan cupang", "kodok hujan",
+        "pohon mangga", "bunga matahari", "kaktus berduri", "jamur ajaib", "rumput pemalu",
+        "daun terbang", "kelapa jatuh", "bambu lentur", "mawar berduri", "bonsai tua",
+        "sepeda merah", "skuter terbang", "kereta mini", "roket kardus", "kapal kertas",
+        "balon biru", "layang-layang", "payung terbalik", "sepatu kiri", "kaus kaki hilang",
+        "topi ulang tahun", "kacamata hitam", "jam pasir", "kotak musik", "boneka salju",
+        "buku misteri", "pensil patah", "penghapus ajaib", "papan tulis", "peta harta",
+        "kunci kuno", "pintu rahasia", "jendela kecil", "tangga licin", "karpet terbang",
+        "lampu berkedip", "cermin jujur", "lonceng tua", "payung merah", "koper kosong",
+        "pizza terakhir", "bakso bulat", "sate panjang", "nasi goreng", "donat berlubang",
+        "permen karet", "cokelat pahit", "teh hangat", "kopi dingin", "susu tumpah",
+        "hujan sore", "pelangi palsu", "awan rendah", "petir kecil", "angin nakal",
+        "bulan sabit", "bintang jatuh", "matahari pagi", "kabut tipis", "salju tropis",
+      ];
+      const SPEC_TASKS = [
+        "Bantu {x} melewati jebakan ini.", "Pecahkan masalah {x} tanpa panik.",
+        "Buktikan bahwa {x} tidak bisa menipumu.", "Cari cara paling cerdik untuk {x}.",
+        "Ikuti petunjuk dan selamatkan {x}.", "Jangan biarkan {x} membuatmu salah klik.",
+        "Tunjukkan siapa yang lebih pintar: kamu atau {x}.", "Selesaikan misi rahasia {x}.",
+        "Buat {x} mengakui bahwa kamu benar.", "Tuntaskan tantangan terakhir untuk {x}.",
+      ];
+      L.forEach((level, index) => {
+        const number = index + 1;
+        if (number !== 10 && number !== 100) {
+          const subject = SPEC_SUBJECTS[index];
+          level.t = `${SPEC_TASKS[index % SPEC_TASKS.length].replace("{x}", subject)} #${number}`;
+          const originalInstruction = level.i;
+          level.i = () =>
+            `${SPEC_TASKS[(index + 3) % SPEC_TASKS.length].replace("{x}", subject)} ${f(originalInstruction)} (Level ${number}/100)`;
+          const originalHint = level.h;
+          level.h = () =>
+            `Trik untuk misi ${subject}: ${f(originalHint)} Jangan menyerah pada troll.`;
+        }
+      });
       const MAX_LEVELS = L.length;
       let DB = null,
         SM = null,
