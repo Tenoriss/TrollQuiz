@@ -48,9 +48,9 @@
       }
       body {
         background:
-          radial-gradient(circle at 15% 10%, #ffd6ec 0 18%, transparent 19%),
-          radial-gradient(circle at 90% 85%, #c9f3ff 0 22%, transparent 23%),
-          var(--bg);
+          radial-gradient(circle at 8% 8%, #ffd6ec 0 13%, transparent 28%),
+          radial-gradient(circle at 94% 88%, #c9f3ff 0 16%, transparent 30%),
+          linear-gradient(135deg, #fff7fc 0%, var(--bg) 48%, #effcff 100%);
       }
       #app {
         position: relative;
@@ -58,6 +58,18 @@
         min-height: 100vh;
         max-width: 720px;
         margin: auto;
+        isolation: isolate;
+      }
+      #app::before {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        z-index: -1;
+        border: 1px solid #ffffffaa;
+        border-radius: 34px;
+        background: #ffffff3d;
+        box-shadow: 0 22px 70px #7c4dff18;
+        pointer-events: none;
       }
       .scr {
         display: none;
@@ -87,6 +99,7 @@
         transition:
           transform 0.1s,
           box-shadow 0.1s;
+        background-image: linear-gradient(180deg, #ffffff35, transparent 48%);
       }
       .b:hover {
         rotate: -2deg;
@@ -261,6 +274,12 @@
         align-items: center;
         justify-content: space-between;
         gap: 6px;
+        padding: 8px 10px;
+        border: 2px solid #ffffffaa;
+        border-radius: 18px;
+        background: #ffffff66;
+        box-shadow: 0 5px 16px #2b1b5412;
+        backdrop-filter: blur(8px);
       }
       #ttl {
         font-weight: 800;
@@ -285,6 +304,7 @@
         border-radius: 28px;
         background: linear-gradient(#bfe9ff, #fff4c9);
         touch-action: none;
+        box-shadow: 0 12px 0 #2b1b5418, 0 22px 35px #2b1b5418;
       }
       .fill {
         position: absolute;
@@ -4067,6 +4087,247 @@
         },
         40,
       );
+      const bonusFail = (messages) => () => lose(pick(messages));
+      L.push(
+        Zf(
+          101,
+          "KOK BISA?!",
+          "Ada 3 orang masuk ke kamar. Dua orang keluar. Berapa yang tersisa?",
+          "Jangan hitung yang paling mudah dilihat.",
+          () => {
+            let out = 0;
+            st.innerHTML =
+              scn(ROOM) +
+              o("🧍", 22, 62, 18, "p101a") +
+              o("🧍", 45, 62, 18, "p101b") +
+              o("🧍", 68, 62, 18, "p101c") +
+              doorHTML("d101", 84, 48, 18, 38) +
+              o("🧍", 84, 75, 12, "p101secret", "secret101");
+            $("#p101secret").style.opacity = ".08";
+            ["p101a", "p101b", "p101c"].forEach((id) =>
+              drag($("#" + id), {
+                end: (el) => {
+                  if (near(el, $("#d101")) && !el.dataset.counted) {
+                    el.dataset.counted = "1";
+                    el.style.opacity = ".25";
+                    out++;
+                    if (out === 2) win("Kamu menghitung manusia yang tidak kelihatan.");
+                  }
+                },
+              }),
+            );
+          },
+        ),
+        Zf(
+          102,
+          "JANGAN SELAMATKAN DIA!",
+          "Selamatkan orang yang sedang tenggelam!",
+          "Yang tenggelam belum tentu objeknya.",
+          () => {
+            st.innerHTML =
+              '<div style="position:absolute;inset:58% 0 0;background:#35b9e8;border-top:4px solid var(--ink)"></div>' +
+              o("🧍", 50, 72, 20, "drown102") +
+              o("SELAMATKAN ORANG", 50, 22, 8, "word102", "bub") +
+              o("🌊", 18, 72, 12, "", "wave") +
+              o("🌊", 82, 72, 12, "", "wave");
+            drag($("#word102"), {
+              end: (el) => {
+                if (el.getBoundingClientRect().top < st.getBoundingClientRect().top + st.clientHeight * 0.58)
+                  win("Kamu menyelamatkan tata bahasa.");
+              },
+            });
+          },
+        ),
+        Zf(
+          103,
+          "MATIKAN MATAHARI!",
+          "Ruangan terlalu panas. Matikan matahari!",
+          "Ada sesuatu yang bisa ditutup tanpa menyentuh tombol.",
+          () => {
+            st.innerHTML =
+              o("☀️", 78, 20, 32, "sun103") +
+              o("🔌", 22, 25, 16, "power103") +
+              o("🌀", 20, 75, 18, "fan103") +
+              o("😀", 50, 61, 30, "face103") +
+              '<div class="o" id="lid103a" style="left:45%;top:58%;width:7cqmin;height:2cqmin;background:var(--ink);border-radius:99px"></div>' +
+              '<div class="o" id="lid103b" style="left:55%;top:58%;width:7cqmin;height:2cqmin;background:var(--ink);border-radius:99px"></div>';
+            ["lid103a", "lid103b"].forEach((id) =>
+              drag($("#" + id), {
+                end: (el) => {
+                  if (el.getBoundingClientRect().top > st.getBoundingClientRect().top + st.clientHeight * 0.63) {
+                    el.style.opacity = ".35";
+                    if ($("#lid103a").style.opacity && $("#lid103b").style.opacity) win("Matahari masih menyala. Kamu saja yang menyerah melihat.");
+                  }
+                },
+              }),
+            );
+            ["sun103", "power103", "fan103"].forEach((id) => ($("#" + id).onclick = bonusFail(["Tombol itu cuma membuat panasnya lebih emosional.", "Kamu mematikan benda yang salah."])));
+          },
+        ),
+        Zf(
+          104,
+          "BERAPA EKOR KUCING?",
+          "Ada 4 kucing. Masing-masing punya 4 kaki dan 1 ekor. Berapa jumlah ekornya?",
+          "Kaki tidak ikut menjawab pertanyaan.",
+          () => {
+            let count = 0;
+            st.innerHTML =
+              o("🐈", 20, 38, 22, "cat104a") +
+              o("🐈", 43, 38, 22, "cat104b") +
+              o("🐈", 66, 38, 22, "cat104c") +
+              o("🐈", 34, 72, 22, "cat104d") +
+              o("▰", 50, 30, 10, "tail104", "tail");
+            ["cat104a", "cat104b", "cat104c", "cat104d"].forEach((id) =>
+              $("#" + id).onclick = () => {
+                const selected = $("#" + id).classList.toggle("sel");
+                count += selected ? 1 : -1;
+                if (count === 4) {
+                  if ($("#answer104")) return;
+                  const b = document.createElement("button");
+                  b.id = "answer104";
+                  b.className = "b pk";
+                  b.textContent = "JAWAB: 4";
+                  b.style.cssText = "position:absolute;left:50%;top:86%;transform:translateX(-50%)";
+                  b.onclick = () => win("Kamu menghitung ekor, bukan kepanikan.");
+                  st.append(b);
+                }
+              },
+            );
+            $("#tail104").onclick = bonusFail(["Itu bukan kucing kelima.", "Kamu menemukan ekor, bukan jawaban."]);
+          },
+        ),
+        Zf(
+          105,
+          "CARI TOMBOL LANJUTKAN",
+          "Tekan tombol LANJUTKAN untuk melanjutkan!",
+          "Tulisan juga bisa punya niat buruk.",
+          () => {
+            st.innerHTML =
+              '<div class="q" id="continue105" style="top:12%;cursor:pointer;text-decoration:underline">LANJUTKAN</div>' +
+              '<div class="g4" style="top:40%">' +
+              ["LANJUT", "MULAI", "NEXT", "KELUAR"].map((x) => `<button class="b ${pick(["pk","cy","or","sk"])}">${x}</button>`).join("") +
+              "</div>";
+            $$(".g4 .b").forEach((b) => (b.onclick = bonusFail(["Tombolnya terlihat meyakinkan, ya?", "Kamu terlalu percaya bentuk tombol."])));
+            $("#continue105").onclick = () => win("Ternyata judulnya juga bisa diklik.");
+          },
+        ),
+        Zf(
+          106,
+          "SELAMATKAN TELUR!",
+          "Jatuhkan telur dari ketinggian tanpa membuatnya pecah!",
+          "Benda paling besar di bawah mungkin punya pekerjaan.",
+          () => {
+            st.innerHTML =
+              o("🥚", 50, 22, 18, "egg106") +
+              '<div id="ground106" style="position:absolute;left:15%;top:82%;width:70%;height:8%;background:#a96f3b;border:4px solid var(--ink);border-radius:20px"></div>' +
+              o("⬇️", 50, 47, 10, "arrow106");
+            let safe = false;
+            drag($("#ground106"), {
+              end: (el) => {
+                if (el.getBoundingClientRect().top < st.getBoundingClientRect().top + st.clientHeight * 0.58) {
+                  safe = true;
+                  el.style.top = "62%";
+                  say("Tanah bergeser. Logika juga.");
+                }
+              },
+            });
+            drag($("#egg106"), {
+              end: () =>
+                safe
+                  ? win("Kamu memindahkan bumi demi telur.")
+                  : lose("Telurnya jatuh ke dalam drama."),
+            });
+          },
+        ),
+        Zf(
+          107,
+          "SIAPA YANG PALING BODOH?",
+          "Ada tiga orang. Satu pintar, satu bodoh, satu tidak tahu apa-apa. Siapa yang menjawab?",
+          "Cermin tidak pernah ikut ujian.",
+          () => {
+            st.innerHTML =
+              o("🧠", 23, 35, 18, "smart107") +
+              o("🤪", 50, 35, 18, "silly107") +
+              o("🤷", 77, 35, 18, "none107") +
+              o("🪞", 50, 72, 22, "mirror107");
+            drag($("#mirror107"), {
+              end: (el) => {
+                if (near(el, $("#silly107"))) win("Cermin itu jujur, sayangnya.");
+                else lose("Cerminnya belum cukup dekat dengan kenyataan.");
+              },
+            });
+          },
+        ),
+        Zf(
+          108,
+          "JANGAN BIARKAN AYAM BERTELUR!",
+          "Hentikan ayam agar tidak bertelur!",
+          "Yang bersembunyi di layar bukan selalu musuh.",
+          () => {
+            st.innerHTML =
+              o("🐔", 68, 57, 25, "hen108") +
+              o("🌾", 20, 70, 30, "grass108") +
+              o("🐓", 8, 84, 18, "rooster108", "hiddenRooster");
+            $("#rooster108").style.opacity = ".08";
+            drag($("#rooster108"), {
+              end: (el) => {
+                if (near(el, $("#hen108"))) win("Kamu menjadi mak comblang unggas.");
+                else say("Ada yang bersembunyi di balik rumput.");
+              },
+            });
+            $("#grass108").onclick = () => ($("#rooster108").style.opacity = "1");
+            $("#hen108").onclick = bonusFail(["Jangan ganggu ayamnya, cari pasangannya.", "Kamu membuat ayam makin panik."]);
+          },
+        ),
+        Zf(
+          109,
+          "HILANGKAN ANGKA 1!",
+          "Hapus angka 1 dari angka 100!",
+          "Jari lebih berguna daripada tombol yang disediakan.",
+          () => {
+            st.innerHTML =
+              '<div id="digits109" style="position:absolute;inset:20% 10%;display:flex;align-items:center;justify-content:center;gap:2cqmin;font-size:25cqmin;font-weight:800"><span>1</span><span>0</span><span>0</span></div><button class="b rd" id="erase109" style="position:absolute;bottom:8%;left:50%;transform:translateX(-50%)">HAPUS</button>';
+            let erased = false;
+            st.onpointerdown = (e) => {
+              if (e.target.closest("#erase109")) return lose("Tombol itu cuma menghapus harapan.");
+              if (!erased && e.target.closest("#digits109 span")?.textContent === "1") {
+                e.target.closest("#digits109 span").remove();
+                erased = true;
+                win("Satu hilang, dua nol tetap menertawakanmu.");
+              }
+            };
+          },
+        ),
+        Zf(
+          110,
+          "FINAL BOSS: KAMU YANG TERJEBAK!",
+          "Jika menjawab benar kamu kalah. Jika salah kamu menang. Apa jawabanmu?",
+          "Tidak semua pertanyaan membutuhkan jari.",
+          () => {
+            let wait = 10;
+            st.innerHTML =
+              '<div class="q" style="top:12%;font-size:7cqmin">BENAR = KALAH<br>SALAH = MENANG</div>' +
+              '<div class="g4" style="top:44%"><button class="b gr" id="true110">BENAR</button><button class="b rd" id="false110">SALAH</button></div>' +
+              '<div class="q" id="wait110" style="top:82%;font-size:5cqmin">Tunggu 10 detik…</div>';
+            ["true110", "false110"].forEach((id) => ($("#" + id).onclick = bonusFail(["Kamu menjawab. Itu sudah terlalu banyak.", "Diam dulu, jagoan."])));
+            const timer = setInterval(() => {
+              if (locked || cur !== 110) return clearInterval(timer);
+              wait--;
+              $("#wait110").textContent = wait ? `Tunggu ${wait} detik…` : "Sekarang jangan tekan apa pun lagi.";
+              if (!wait) {
+                clearInterval(timer);
+                const done = document.createElement("button");
+                done.className = "b pk";
+                done.textContent = "SELESAI";
+                done.style.cssText = "position:absolute;left:50%;top:82%;transform:translateX(-50%)";
+                done.onclick = () => win("Akhirnya kamu berhasil tidak melakukan apa-apa.");
+                st.append(done);
+              }
+            }, 1000);
+            clean.push(() => clearInterval(timer));
+          },
+        ),
+      );
       const SPEC_SUBJECTS = [
         "kucing kosmik", "pisang licin", "robot pemalu", "naga mini", "es krim nakal",
         "ayam detektif", "alien kos", "bebek ninja", "hantu ramah", "ikan berkacamata",
@@ -4098,7 +4359,7 @@
       ];
       L.forEach((level, index) => {
         const number = index + 1;
-        if (number !== 10 && number !== 100) {
+        if (number <= 100 && number !== 10 && number !== 100) {
           const subject = SPEC_SUBJECTS[index];
           level.t = `${SPEC_TASKS[index % SPEC_TASKS.length].replace("{x}", subject)} #${number}`;
           level.i = () =>
