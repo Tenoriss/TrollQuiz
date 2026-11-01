@@ -83,6 +83,19 @@
       }
       .scr.on {
         display: flex;
+        animation: screenIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      @keyframes screenIn {
+        from {
+          opacity: 0;
+          translate: 0 12px;
+          scale: 0.985;
+        }
+        to {
+          opacity: 1;
+          translate: 0 0;
+          scale: 1;
+        }
       }
       .b {
         font: inherit;
@@ -96,18 +109,46 @@
         box-shadow: 0 5px 0 var(--ink);
         cursor: pointer;
         touch-action: manipulation;
+        position: relative;
+        overflow: hidden;
         transition:
-          transform 0.1s,
-          box-shadow 0.1s;
+          transform 0.14s,
+          box-shadow 0.14s,
+          filter 0.14s;
         background-image: linear-gradient(180deg, #ffffff35, transparent 48%);
       }
       .b:hover {
         rotate: -2deg;
         scale: 1.05;
+        filter: brightness(1.08) saturate(1.08);
       }
       .b:active {
         translate: 0 4px;
         box-shadow: 0 1px 0 var(--ink);
+      }
+      .b:focus-visible {
+        outline: 4px solid #fff;
+        outline-offset: 3px;
+      }
+      .b.tap::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: var(--tap-x, 50%);
+        top: var(--tap-y, 50%);
+        border-radius: 50%;
+        background: #fff9;
+        translate: -50% -50%;
+        scale: 0;
+        animation: ripple 0.45s ease-out;
+        pointer-events: none;
+      }
+      @keyframes ripple {
+        to {
+          scale: 14;
+          opacity: 0;
+        }
       }
       .b:disabled {
         opacity: 0.45;
@@ -173,6 +214,12 @@
         -webkit-text-stroke: 3px var(--ink);
         paint-order: stroke fill;
         text-shadow: 0 5px 0 var(--ink);
+        animation: logoFloat 4s ease-in-out infinite;
+      }
+      @keyframes logoFloat {
+        50% {
+          translate: 0 -4px;
+        }
       }
       .logo span {
         display: block;
@@ -305,6 +352,25 @@
         background: linear-gradient(#bfe9ff, #fff4c9);
         touch-action: none;
         box-shadow: 0 12px 0 #2b1b5418, 0 22px 35px #2b1b5418;
+        isolation: isolate;
+      }
+      #stage::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        pointer-events: none;
+        opacity: 0.2;
+        background:
+          linear-gradient(115deg, transparent 0 42%, #fff8 47%, transparent 52%),
+          repeating-linear-gradient(0deg, transparent 0 28px, #fff4 29px 30px);
+        background-size: 220% 100%, 100% 100%;
+        animation: stageSheen 8s linear infinite;
+      }
+      @keyframes stageSheen {
+        to {
+          background-position: -220% 0, 0 0;
+        }
       }
       .fill {
         position: absolute;
@@ -418,6 +484,13 @@
         border-radius: 22px;
         padding: 6px 12px;
         min-height: 64px;
+        box-shadow: 0 6px 0 #2b1b5422;
+        transition: transform 0.2s, background 0.2s;
+      }
+      #bub:has(.laugh),
+      #bub:has(.shock) {
+        background: #fff6cf;
+        transform: rotate(-1deg);
       }
       #gm {
         width: 52px;
@@ -478,6 +551,17 @@
       }
       #toast.on {
         opacity: 1;
+        animation: toastIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      @keyframes toastIn {
+        from {
+          translate: -50% 12px;
+          scale: 0.85;
+        }
+        to {
+          translate: -50% 0;
+          scale: 1;
+        }
       }
       .shake {
         animation: sh 0.4s;
@@ -527,12 +611,27 @@
         justify-content: center;
       }
       .avs button {
-        font-size: 1.8rem;
         background: #fff;
         border: 3px solid var(--ink);
         border-radius: 14px;
-        padding: 2px 8px;
+        padding: 6px;
+        width: 58px;
+        height: 58px;
         cursor: pointer;
+      }
+      .avatar-art {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #pbtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      #pbtn .avatar-art {
+        width: 1.35em;
+        height: 1.35em;
       }
       .avs .sel {
         background: var(--yl);
@@ -1039,9 +1138,9 @@
           <button class="b sm" data-go="prof" id="pbtn"></button
           ><span class="pill"><i data-ic="c"></i> <b id="coins"></b></span
           ><span
-            ><button class="b sm" data-a="lang">🌐</button>
-            <button class="b sm" data-a="inv">👥</button>
-            <button class="b sm" data-a="snd" id="sndb">🔊</button></span
+            ><button class="b sm" data-a="lang" aria-label="Language"><i data-ic="g"></i></button>
+            <button class="b sm" data-a="inv" aria-label="Invite friends"><i data-ic="u"></i></button>
+            <button class="b sm" data-a="snd" id="sndb" aria-label="Sound"><i data-ic="v"></i></button></span
           >
         </div>
         <div class="logo"><span>SMART</span><span>QUIZ</span></div>
@@ -1054,8 +1153,8 @@
           ><button class="b or" data-a="daily">DAILY CHALLENGE</button>
         </div>
         <div class="row">
-          <button class="b sk" data-go="ach">🏆 Awards</button
-          ><button class="b pu" data-go="set">⚙ Settings</button>
+          <button class="b sk" data-go="ach"><i data-ic="a"></i> Awards</button
+          ><button class="b pu" data-go="set"><i data-ic="q"></i> Settings</button>
         </div>
       </section>
 
@@ -1076,7 +1175,7 @@
             <div id="liv"></div>
             <small id="scr"></small>
           </div>
-          <button class="b sm yl" data-a="hint" id="hb">💡</button>
+          <button class="b sm yl" data-a="hint" id="hb" aria-label="Hint"><i data-ic="b"></i></button>
         </div>
         <p id="ins"></p>
         <div style="display: flex; width: 100%; gap: 8px; align-items: center">
@@ -1547,8 +1646,9 @@
             tr("score") +
             " " +
             S.sc;
-          $("#sndb").textContent = S.snd ? "🔊" : "🔇";
-          $("#pbtn").textContent = S.av + " " + (S.name || tr("Player"));
+          $("#sndb").innerHTML = S.snd ? ic("v") : ic("m");
+            $("#pbtn").innerHTML =
+              avatarSvg(S.av) + `<span>${S.name || tr("Player")}</span>`;
           if ((A.d || 0) >= 2) {
             const p = $("[data-a=play]");
             p.style.translate = "";
@@ -1919,6 +2019,15 @@
       document.addEventListener("click", (e) => {
         const t = e.target.closest("[data-a],[data-go]");
         if (!t) return;
+        if (t.classList.contains("b")) {
+          const r = t.getBoundingClientRect();
+          t.style.setProperty("--tap-x", `${e.clientX - r.left}px`);
+          t.style.setProperty("--tap-y", `${e.clientY - r.top}px`);
+          t.classList.remove("tap");
+          void t.offsetWidth;
+          t.classList.add("tap");
+          setTimeout(() => t.classList.remove("tap"), 500);
+        }
         sTap();
         if (t.dataset.go) {
           if (
@@ -1997,7 +2106,7 @@
       function hud() {
         const l = L[cur - 1];
         $("#ttl").textContent =
-          (dly ? "📅 " : "") + cur + ". " + f(l.t) + " · " + tr(l.g);
+          (dly ? "Daily · " : "") + cur + ". " + f(l.t) + " · " + tr(l.g);
         $("#liv").innerHTML =
           ic("h").repeat(lives) + ic("hx").repeat(Math.max(0, 3 - lives));
         $("#scr").innerHTML = ic("s") + " " + S.sc;
@@ -2142,7 +2251,7 @@
         loc();
       }
       function renderProf() {
-        $("#pav").textContent = S.av;
+        $("#pav").innerHTML = avatarSvg(S.av);
         const p = $("#pn");
         p.value = S.name;
         p.placeholder = tr("Your name");
@@ -2153,14 +2262,14 @@
         $("#avs").innerHTML = ["👾", "😈", "🐱", "🦊", "🐸", "🦄", "🤖", "👻"]
           .map(
             (a) =>
-              `<button class="${a == S.av ? "sel" : ""}" data-a="av" data-v="${a}">${a}</button>`,
+              `<button class="${a == S.av ? "sel" : ""}" data-a="av" data-v="${a}" aria-label="Choose avatar">${avatarSvg(a)}</button>`,
           )
           .join("");
         $("#pst").innerHTML = [
-          ["🪙 Coins", S.c],
-          ["⭐ Score", S.sc],
-          ["✅ Levels solved", Object.keys(S.d).length + "/" + MAX_LEVELS],
-          ["💡 Hints", S.h],
+          [ic("c") + " Coins", S.c],
+          [ic("s") + " Score", S.sc],
+          ["✓ Levels solved", Object.keys(S.d).length + "/" + MAX_LEVELS],
+          [ic("b") + " Hints", S.h],
         ]
           .map(
             (r) =>
@@ -4563,6 +4672,18 @@
       };
       const sv = (i) =>
         `<svg viewBox='0 0 100 100' style='width:1em;height:1em;display:block;overflow:visible' stroke='#2b1b54' stroke-width='4' stroke-linejoin='round' stroke-linecap='round' fill='none'>${i}</svg>`;
+      const AV = {
+        "👾": `<path d='M20 38L27 12l16 20h14l16-20 7 26v34H20z' fill='#7c4dff'/><circle cx='39' cy='53' r='8' fill='#fff'/><circle cx='61' cy='53' r='8' fill='#fff'/><circle cx='39' cy='53' r='3' fill='#2b1b54' stroke='none'/><circle cx='61' cy='53' r='3' fill='#2b1b54' stroke='none'/><path d='M36 70q14 10 28 0'/>`,
+        "😈": `<path d='M20 38L28 10l18 20h8L72 10l8 28v38H20z' fill='#8e55e8'/><path d='M32 50l12 5M68 50L56 55M40 69q10 8 20 0' stroke='#ffd93d'/>`,
+        "🐱": `<path d='M22 40L28 12l20 18h4l20-18 6 28v34H22z' fill='#ff9248'/><circle cx='39' cy='53' r='4' fill='#2b1b54' stroke='none'/><circle cx='61' cy='53' r='4' fill='#2b1b54' stroke='none'/><path d='M44 67l6 4 6-4M25 62l18 4M75 62l-18 4'/>`,
+        "🦊": `<path d='M18 42L26 10l24 20 24-20 8 32v32H18z' fill='#ff7a45'/><path d='M28 66q22 18 44 0' fill='#fff'/><circle cx='39' cy='52' r='4' fill='#2b1b54' stroke='none'/><circle cx='61' cy='52' r='4' fill='#2b1b54' stroke='none'/>`,
+        "🐸": `<path d='M22 42q0-24 28-24t28 24v38H22z' fill='#4ccf6a'/><circle cx='35' cy='31' r='11' fill='#7ee27e'/><circle cx='65' cy='31' r='11' fill='#7ee27e'/><circle cx='35' cy='31' r='3' fill='#2b1b54' stroke='none'/><circle cx='65' cy='31' r='3' fill='#2b1b54' stroke='none'/><path d='M34 64q16 12 32 0'/>`,
+        "🦄": `<path d='M22 36L29 12l18 20h6l18-20 7 24v40H22z' fill='#ff9ed2'/><path d='M50 31L58 5l8 20' fill='#b79bff'/><circle cx='38' cy='53' r='4' fill='#2b1b54' stroke='none'/><circle cx='62' cy='53' r='4' fill='#2b1b54' stroke='none'/><path d='M40 69q10 8 20 0'/>`,
+        "🤖": `<rect x='20' y='28' width='60' height='52' rx='14' fill='#b8c4d6'/><path d='M50 28V12M44 12h12' fill='none'/><circle cx='38' cy='53' r='5' fill='#35d6ed'/><circle cx='62' cy='53' r='5' fill='#35d6ed'/><path d='M38 68h24'/>`,
+        "👻": `<path d='M22 82V44q0-28 28-28t28 28v38l-12-8-10 8-12-8-10 8z' fill='#fff'/><circle cx='40' cy='48' r='4' fill='#2b1b54' stroke='none'/><circle cx='60' cy='48' r='4' fill='#2b1b54' stroke='none'/><path d='M43 65q7 6 14 0'/>`,
+      };
+      const avatarSvg = (key) =>
+        `<span class="avatar-art">${sv(AV[key] || AV["👾"])}</span>`;
       function skin() {
         $$("#stage .o,#stage .cat,#stage .eg span").forEach((e) => {
           if (e.children.length) return;
@@ -4583,6 +4704,12 @@
         b: `<path d='M50 8a28 28 0 0 0-14 52v10h28V60A28 28 0 0 0 50 8z' fill='#ffe27a'/><rect x='38' y='74' width='24' height='10' fill='#9a9aa6'/>`,
         p: `<rect x='22' y='14' width='20' height='72' rx='6' fill='#7c4dff'/><rect x='58' y='14' width='20' height='72' rx='6' fill='#7c4dff'/>`,
         t: `<circle cx='50' cy='56' r='34' fill='#fff'/><path d='M50 56V34M50 56l14 8M40 12h20' />`,
+        g: `<circle cx='50' cy='50' r='34' fill='#bfe9ff'/><path d='M16 50h68M50 16q18 16 0 68M50 16q-18 16 0 68M22 32h56M22 68h56'/>`,
+        u: `<circle cx='35' cy='35' r='12' fill='#ff7eb6'/><circle cx='67' cy='35' r='12' fill='#7c4dff'/><path d='M12 82q3-24 23-24t23 24M44 82q3-24 23-24t23 24'/>`,
+        v: `<path d='M16 44h18l22-18v48L34 56H16z' fill='#35d6ed'/><path d='M68 38q12 12 0 24M76 29q21 21 0 42'/>`,
+        m: `<path d='M16 44h18l22-18v48L34 56H16z' fill='#ff9248'/><path d='M68 38l18 24M86 38L68 62'/>`,
+        a: `<path d='M50 10l10 22 24 3-18 16 5 24-21-12-21 12 5-24-18-16 24-3z' fill='#ffd93d'/><path d='M36 58q14 10 28 0'/>`,
+        q: `<path d='M22 30h56v54H22z' fill='#b79bff'/><path d='M31 22h38v10H31zM34 45h32M34 58h32M34 71h20'/>`,
       };
       const ic = (n) =>
         `<svg viewBox='0 0 100 100' style='width:1.15em;height:1.15em;vertical-align:-.2em;overflow:visible' stroke='#2b1b54' stroke-width='6' stroke-linejoin='round' stroke-linecap='round' fill='none'>${IC[n]}</svg>`;
