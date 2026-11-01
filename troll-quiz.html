@@ -1,0 +1,4399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Smart Quiz – Brain Training</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --pk: #ff7eb6;
+        --yl: #ffd93d;
+        --pu: #7c4dff;
+        --cy: #35d6ed;
+        --or: #ff9248;
+        --sk: #8fd3ff;
+        --ink: #2b1b54;
+        --bg: #fff0fa;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+      }
+      html,
+      body {
+        height: 100%;
+        min-height: 100%;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+        font-weight: 500;
+        overflow: hidden;
+      }
+      body {
+        background:
+          radial-gradient(circle at 15% 10%, #ffd6ec 0 18%, transparent 19%),
+          radial-gradient(circle at 90% 85%, #c9f3ff 0 22%, transparent 23%),
+          var(--bg);
+      }
+      #app {
+        position: relative;
+        height: 100%;
+        min-height: 100vh;
+        max-width: 720px;
+        margin: auto;
+      }
+      .scr {
+        display: none;
+        position: absolute;
+        inset: 0;
+        flex-direction: column;
+        align-items: center;
+        padding: 14px;
+        gap: 10px;
+        overflow: auto;
+      }
+      .scr.on {
+        display: flex;
+      }
+      .b {
+        font: inherit;
+        font-weight: 800;
+        font-size: 1.15rem;
+        border: 3px solid var(--ink);
+        border-radius: 20px;
+        padding: 10px 20px;
+        background: var(--yl);
+        color: var(--ink);
+        box-shadow: 0 5px 0 var(--ink);
+        cursor: pointer;
+        touch-action: manipulation;
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+      }
+      .b:hover {
+        rotate: -2deg;
+        scale: 1.05;
+      }
+      .b:active {
+        translate: 0 4px;
+        box-shadow: 0 1px 0 var(--ink);
+      }
+      .b:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .pk {
+        background: var(--pk);
+      }
+      .pu {
+        background: var(--pu);
+        color: #fff;
+      }
+      .cy {
+        background: var(--cy);
+      }
+      .or {
+        background: var(--or);
+      }
+      .sk {
+        background: var(--sk);
+      }
+      .rd {
+        background: #ff3b4f;
+        color: #fff;
+      }
+      .gr {
+        background: #7ee27e;
+      }
+      .sm {
+        padding: 6px 12px;
+        font-size: 1rem;
+      }
+      .wide {
+        width: min(80%, 320px);
+        font-size: 1.6rem;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .top {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .pill {
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 99px;
+        padding: 2px 14px;
+        font-weight: 800;
+      }
+      .logo {
+        text-align: center;
+        font-weight: 800;
+        font-size: clamp(3rem, 13vw, 5.5rem);
+        line-height: 0.88;
+        color: var(--yl);
+        -webkit-text-stroke: 3px var(--ink);
+        paint-order: stroke fill;
+        text-shadow: 0 5px 0 var(--ink);
+      }
+      .logo span {
+        display: block;
+      }
+      .logo span:first-child {
+        rotate: -4deg;
+        color: var(--pk);
+      }
+      .logo span:last-child {
+        rotate: 3deg;
+      }
+      .mascot {
+        width: min(46vw, 200px);
+        animation: bob 2s ease-in-out infinite;
+      }
+      @keyframes bob {
+        50% {
+          translate: 0 -8px;
+          rotate: 2deg;
+        }
+      }
+      .mon {
+        width: 100%;
+        display: block;
+        overflow: visible;
+      }
+      .mon.laugh {
+        animation: wig 0.25s 4;
+      }
+      .mon.shock {
+        animation: pop 0.4s;
+      }
+      @keyframes wig {
+        50% {
+          rotate: 6deg;
+        }
+      }
+      @keyframes pop {
+        50% {
+          scale: 1.15;
+        }
+      }
+      .prog {
+        width: min(70%, 300px);
+        height: 16px;
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .prog i {
+        display: block;
+        height: 100%;
+        background: var(--cy);
+      }
+      h2 {
+        margin: 4px 0;
+        font-size: 1.8rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+        gap: 12px;
+        width: 100%;
+        padding: 6px;
+      }
+      .lvb {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 1.7rem;
+        line-height: 1;
+      }
+      .lvb small {
+        font-size: 0.7rem;
+      }
+      .list {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .item {
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 18px;
+        padding: 8px 14px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .item.off {
+        opacity: 0.45;
+        filter: grayscale(1);
+      }
+      #hud {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+      }
+      #ttl {
+        font-weight: 800;
+        flex: 1;
+        text-align: center;
+        line-height: 1.05;
+      }
+      #ins {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 800;
+        text-align: center;
+      }
+      #stage {
+        flex: 1;
+        width: 100%;
+        min-height: 200px;
+        position: relative;
+        overflow: hidden;
+        container-type: size;
+        border: 4px solid var(--ink);
+        border-radius: 28px;
+        background: linear-gradient(#bfe9ff, #fff4c9);
+        touch-action: none;
+      }
+      .fill {
+        position: absolute;
+        inset: 0;
+        transition: transform 0.9s;
+      }
+      .o {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        line-height: 1;
+        white-space: nowrap;
+      }
+      .o .b {
+        font-size: 5.5cqmin;
+        padding: 2cqmin 6cqmin;
+      }
+      .zc {
+        position: absolute;
+        bottom: 3%;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+      }
+      .q {
+        position: absolute;
+        top: 10%;
+        width: 100%;
+        text-align: center;
+        font-size: 10cqmin;
+        font-weight: 800;
+      }
+      .g4 {
+        position: absolute;
+        top: 30%;
+        left: 8%;
+        right: 8%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3cqmin;
+      }
+      .g4 .b {
+        font-size: 7cqmin;
+      }
+      .rain {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          105deg,
+          transparent 0 14px,
+          #2f8cff88 14px 17px
+        );
+        animation: rn 0.4s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes rn {
+        to {
+          background-position: -20px 40px;
+        }
+      }
+      .rug {
+        width: 46cqmin;
+        height: 16cqmin;
+        border-radius: 3cqmin;
+        background: repeating-linear-gradient(
+          90deg,
+          #c0457a 0 4cqmin,
+          #ffd93d 4cqmin 8cqmin
+        );
+        border: 3px solid var(--ink);
+      }
+      .rug .sp {
+        position: absolute;
+        right: 2cqmin;
+        top: 1cqmin;
+        font-size: 5cqmin;
+        opacity: 0.7;
+        animation: tw 1.2s infinite;
+      }
+      @keyframes tw {
+        50% {
+          scale: 1.4;
+          opacity: 0.2;
+        }
+      }
+      .rug .cat {
+        position: absolute;
+        left: 30%;
+        top: -9cqmin;
+        font-size: 14cqmin;
+      }
+      .wob {
+        animation: wob 0.4s;
+      }
+      @keyframes wob {
+        25% {
+          rotate: -8deg;
+        }
+        75% {
+          rotate: 8deg;
+        }
+      }
+      #bub {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 22px;
+        padding: 6px 12px;
+        min-height: 64px;
+      }
+      #gm {
+        width: 52px;
+        flex: none;
+      }
+      #sp {
+        margin: 0;
+        font-weight: 800;
+      }
+      #modal {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: #2b1b54aa;
+        z-index: 50;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      #modal.on {
+        display: flex;
+      }
+      .card {
+        background: #fff;
+        border: 4px solid var(--ink);
+        border-radius: 28px;
+        padding: 20px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        max-width: 380px;
+        width: 100%;
+        animation: pop 0.35s;
+      }
+      .card p {
+        margin: 0;
+      }
+      .card .mascot {
+        width: 90px;
+        animation: none;
+      }
+      #toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        translate: -50% 0;
+        background: var(--ink);
+        color: #fff;
+        border-radius: 99px;
+        padding: 8px 18px;
+        font-weight: 800;
+        z-index: 99;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      #toast.on {
+        opacity: 1;
+      }
+      .shake {
+        animation: sh 0.4s;
+      }
+      @keyframes sh {
+        20% {
+          translate: -12px 0;
+        }
+        40% {
+          translate: 12px 0;
+        }
+        60% {
+          translate: -8px 0;
+        }
+        80% {
+          translate: 8px 0;
+        }
+      }
+      .cf {
+        position: fixed;
+        top: -20px;
+        width: 10px;
+        height: 14px;
+        z-index: 99;
+        animation: fall 1.8s ease-in forwards;
+      }
+      @keyframes fall {
+        to {
+          translate: 40px 110vh;
+        }
+      }
+      input {
+        font: inherit;
+        font-weight: 800;
+        border: 3px solid var(--ink);
+        border-radius: 16px;
+        padding: 8px 12px;
+        width: min(100%, 320px);
+        text-align: center;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+      .avs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .avs button {
+        font-size: 1.8rem;
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        padding: 2px 8px;
+        cursor: pointer;
+      }
+      .avs .sel {
+        background: var(--yl);
+      }
+      .opts {
+        position: absolute;
+        top: 34%;
+        left: 6%;
+        right: 6%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3cqmin;
+      }
+      .opts .b {
+        font-size: 4.6cqmin;
+        padding: 2cqmin;
+      }
+      .qq {
+        position: absolute;
+        top: 5%;
+        left: 6%;
+        right: 6%;
+        text-align: center;
+        font-weight: 800;
+        font-size: 5.6cqmin;
+      }
+      .eg {
+        position: absolute;
+        inset: 5%;
+        display: grid;
+        gap: 1cqmin;
+        place-items: center;
+      }
+      .eg span {
+        cursor: pointer;
+        font-size: var(--f);
+        line-height: 1;
+      }
+      .tbar {
+        height: 14px;
+        border: 3px solid var(--ink);
+        border-radius: 99px;
+        background: #fff;
+        overflow: hidden;
+      }
+      .tbar i {
+        display: block;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #35d6ed, #7c4dff);
+        transition: width 1s linear;
+      }
+      .tbar.hot i {
+        background: linear-gradient(90deg, #ff3b4f, #ff9248);
+      }
+      .tbar.hot {
+        animation: sh 0.5s infinite;
+      }
+      #tmr {
+        font-weight: 800;
+        min-width: 60px;
+        text-align: right;
+      }
+      .b {
+        background-image: linear-gradient(
+          rgba(255, 255, 255, 0.45),
+          rgba(255, 255, 255, 0) 55%
+        );
+      }
+      .card {
+        box-shadow: 0 8px 0 var(--ink);
+      }
+      #stage {
+        box-shadow: 0 6px 0 var(--ink);
+      }
+      html {
+        overscroll-behavior: none;
+      }
+      @supports (height: 100dvh) {
+        html,
+        body {
+          height: 100dvh;
+        }
+        #app {
+          min-height: 100dvh;
+        }
+      }
+      @supports (height: 100svh) {
+        #app {
+          min-height: 100svh;
+        }
+      }
+      @media (min-width: 900px) {
+        html {
+          font-size: 18px;
+        }
+        #app {
+          max-width: 860px;
+        }
+      }
+      @media (max-height: 520px) and (orientation: landscape) {
+        #ins {
+          font-size: 1rem;
+        }
+        #bub {
+          min-height: 44px;
+          padding: 2px 10px;
+        }
+        #gm {
+          width: 36px;
+        }
+        .logo {
+          font-size: 2.6rem;
+        }
+        .mascot {
+          width: 90px;
+        }
+      }
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        z-index: -1;
+        border-radius: 50%;
+        animation: fl 10s ease-in-out infinite;
+      }
+      body::before {
+        width: 180px;
+        height: 180px;
+        left: -40px;
+        top: 20%;
+        background: #ffe27a88;
+      }
+      body::after {
+        width: 240px;
+        height: 240px;
+        right: -60px;
+        bottom: 10%;
+        background: #9fe9ff88;
+        animation-delay: -4s;
+      }
+      @keyframes fl {
+        50% {
+          translate: 20px -30px;
+        }
+      }
+      .legs {
+        position: relative;
+        z-index: 5;
+      }
+      .legs::before,
+      .legs::after {
+        content: "";
+        position: absolute;
+        bottom: -30px;
+        width: 8px;
+        height: 30px;
+        background: var(--ink);
+        border-radius: 4px;
+        transform-origin: top center;
+        box-shadow: 7px 26px 0 -1px var(--ink);
+      }
+      .legs::before {
+        left: 28%;
+        animation: run 0.17s infinite;
+      }
+      .legs::after {
+        right: 36%;
+        animation: run 0.17s infinite reverse;
+      }
+      .tired::before,
+      .tired::after {
+        animation: none;
+        rotate: 0deg;
+      }
+      @keyframes run {
+        0% {
+          rotate: 38deg;
+        }
+        50% {
+          rotate: -38deg;
+        }
+        100% {
+          rotate: 38deg;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+      .scr {
+        padding:
+          max(12px, env(safe-area-inset-top, 0px))
+          max(12px, env(safe-area-inset-right, 0px))
+          max(12px, env(safe-area-inset-bottom, 0px))
+          max(12px, env(safe-area-inset-left, 0px));
+        gap: clamp(8px, 1.5vw, 16px);
+      }
+      .b {
+        min-height: 44px;
+      }
+      .sm {
+        min-height: 40px;
+      }
+      .top {
+        flex-shrink: 0;
+      }
+      .top > h2 {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        text-align: center;
+      }
+      #menu .top > span:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 4px;
+      }
+      #menu .top > span:last-child .b {
+        min-width: 44px;
+      }
+      #game {
+        min-height: 0;
+      }
+      #stage {
+        min-height: clamp(220px, 42dvh, 620px);
+      }
+      #bub {
+        flex-shrink: 0;
+      }
+      .row {
+        width: min(100%, 620px);
+      }
+      .row .b {
+        flex: 1 1 160px;
+      }
+      @media (max-width: 600px) {
+        html,
+        body {
+          font-size: 15px;
+        }
+        .scr {
+          padding:
+            max(10px, env(safe-area-inset-top, 0px))
+            max(10px, env(safe-area-inset-right, 0px))
+            max(10px, env(safe-area-inset-bottom, 0px))
+            max(10px, env(safe-area-inset-left, 0px));
+        }
+        .logo {
+          font-size: clamp(2.7rem, 17vw, 4.5rem);
+        }
+        .mascot {
+          width: min(42vw, 170px);
+        }
+        .wide {
+          width: min(100%, 320px);
+          font-size: 1.35rem;
+        }
+        .row {
+          gap: 8px;
+        }
+        .row .b {
+          flex-basis: 135px;
+          padding-inline: 12px;
+        }
+        #hud {
+          gap: 4px;
+        }
+        #ttl {
+          font-size: 0.9rem;
+        }
+        #tmr {
+          min-width: 48px;
+        }
+        #ins {
+          font-size: 1.1rem;
+          line-height: 1.05;
+        }
+        #stage {
+          min-height: clamp(200px, 42dvh, 460px);
+          border-width: 3px;
+          border-radius: 22px;
+        }
+        #bub {
+          min-height: 56px;
+          padding: 5px 9px;
+        }
+        #gm {
+          width: 42px;
+        }
+        .item {
+          padding-inline: 10px;
+        }
+        .grid {
+          grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+          gap: 8px;
+          padding: 2px;
+        }
+        .lvb {
+          font-size: 1.45rem;
+        }
+        .card {
+          padding: 16px;
+          border-width: 3px;
+          border-radius: 22px;
+        }
+      }
+      @media (min-width: 601px) and (max-width: 1024px) {
+        #app {
+          max-width: 900px;
+        }
+        .scr {
+          padding: clamp(16px, 3vw, 28px);
+        }
+        #stage {
+          min-height: clamp(280px, 48dvh, 620px);
+        }
+        .logo {
+          font-size: clamp(4rem, 11vw, 6rem);
+        }
+      }
+      @media (min-width: 1025px) {
+        #app {
+          max-width: 1024px;
+        }
+        .scr {
+          padding: 24px clamp(24px, 4vw, 48px);
+        }
+        #stage {
+          min-height: min(620px, 56dvh);
+        }
+      }
+      @media (max-height: 560px) {
+        .scr {
+          gap: 6px;
+        }
+        #stage {
+          min-height: 170px;
+        }
+        #bub {
+          min-height: 48px;
+        }
+        #gm {
+          width: 34px;
+        }
+      }
+      .dr {
+        overflow: visible;
+      }
+      .dpanel {
+        position: absolute;
+        inset: 0;
+        transform-origin: left center;
+        filter: drop-shadow(0 0.8cqmin 0 rgba(43, 27, 84, 0.3));
+      }
+      .dback {
+        position: absolute;
+        inset: 0;
+      }
+      .sign {
+        background: #2fbf71;
+        color: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 8px;
+        padding: 0.5cqmin 2.5cqmin;
+        font-size: 4cqmin;
+        font-weight: 800;
+        box-shadow: 0 0.6cqmin 0 var(--ink);
+      }
+      .sg {
+        position: absolute;
+        inset: 12% 10%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4cqmin;
+      }
+      .sq {
+        border: 3px solid var(--ink);
+        border-radius: 5cqmin;
+        box-shadow: 0 1cqmin 0 var(--ink);
+        cursor: pointer;
+        transition:
+          filter 0.1s,
+          scale 0.1s;
+      }
+      .sq.lit {
+        filter: brightness(1.7) saturate(1.5);
+        scale: 1.06;
+        box-shadow: 0 0 5cqmin #fff;
+      }
+      .tm {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        top: 36%;
+        height: 14cqmin;
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .zn {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: #4ccf6a;
+      }
+      .mk {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        margin-left: -5px;
+        background: var(--ink);
+      }
+      .blink {
+        animation: bk 0.45s infinite;
+      }
+      @keyframes bk {
+        50% {
+          opacity: 0.08;
+        }
+      }
+      .lt {
+        position: absolute;
+        left: 6%;
+        right: 6%;
+        top: 46%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2cqmin;
+        justify-content: center;
+      }
+      .lt .b {
+        font-size: 7cqmin;
+        padding: 1.2cqmin 3cqmin;
+      }
+      .rw {
+        position: absolute;
+        left: 3%;
+        right: 3%;
+        top: 38%;
+        display: flex;
+        gap: 2cqmin;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .rw .b {
+        font-size: 5cqmin;
+        padding: 1.6cqmin 2.4cqmin;
+      }
+      .rw.nw {
+        flex-wrap: nowrap;
+      }
+      .rw.nw .b {
+        padding: 1.6cqmin 1.8cqmin;
+      }
+      .cg {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        width: 100%;
+      }
+      .cc {
+        aspect-ratio: 1;
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        padding: 4px;
+        font-size: 3rem;
+        font-family: inherit;
+      }
+      .cc.sel {
+        background: var(--yl);
+        box-shadow: inset 0 0 0 3px var(--pu);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <section
+        class="scr on"
+        id="splash"
+        data-a="start"
+        style="justify-content: center; cursor: pointer"
+      >
+        <div class="logo"><span>SMART</span><span>QUIZ</span></div>
+        <div class="mascot m0"></div>
+        <p style="font-weight: 800; font-size: 1.3rem">
+          A relaxing puzzle game for everyone. Tap to start.
+        </p>
+        <div class="prog" style="width: min(70%, 300px)">
+          <i id="spb" style="width: 4%; transition: width 0.14s linear"></i>
+        </div>
+      </section>
+
+      <section class="scr" id="menu">
+        <div class="top">
+          <button class="b sm" data-go="prof" id="pbtn"></button
+          ><span class="pill"><i data-ic="c"></i> <b id="coins"></b></span
+          ><span
+            ><button class="b sm" data-a="lang">🌐</button>
+            <button class="b sm" data-a="inv">👥</button>
+            <button class="b sm" data-a="snd" id="sndb">🔊</button></span
+          >
+        </div>
+        <div class="logo"><span>SMART</span><span>QUIZ</span></div>
+        <div class="mascot m0"></div>
+        <div class="prog"><i id="pb"></i></div>
+        <small id="pt"></small>
+        <button class="b pk wide" data-a="play">▶ PLAY</button>
+        <div class="row">
+          <button class="b cy" data-go="lv">LEVELS</button
+          ><button class="b or" data-a="daily">DAILY CHALLENGE</button>
+        </div>
+        <div class="row">
+          <button class="b sk" data-go="ach">🏆 Awards</button
+          ><button class="b pu" data-go="set">⚙ Settings</button>
+        </div>
+      </section>
+
+      <section class="scr" id="lv">
+        <div class="top">
+          <button class="b sm" data-go="menu">← Back</button>
+          <h2>Levels</h2>
+          <span></span>
+        </div>
+        <div class="grid" id="lvg"></div>
+      </section>
+
+      <section class="scr" id="game">
+        <div id="hud">
+          <button class="b sm" data-a="pause"><i data-ic="p"></i></button>
+          <div id="ttl"></div>
+          <div style="text-align: right; font-weight: 800">
+            <div id="liv"></div>
+            <small id="scr"></small>
+          </div>
+          <button class="b sm yl" data-a="hint" id="hb">💡</button>
+        </div>
+        <p id="ins"></p>
+        <div style="display: flex; width: 100%; gap: 8px; align-items: center">
+          <div class="tbar" id="tbar" style="flex: 1"><i></i></div>
+          <b id="tmr"></b>
+        </div>
+        <div id="stage"></div>
+        <div id="bub">
+          <div id="gm"></div>
+          <p id="sp"></p>
+        </div>
+      </section>
+
+      <section class="scr" id="ach">
+        <div class="top">
+          <button class="b sm" data-go="menu">← Back</button>
+          <h2>Awards</h2>
+          <span></span>
+        </div>
+        <div class="list" id="al"></div>
+      </section>
+      <section class="scr" id="prof">
+        <div class="top">
+          <button class="b sm" data-go="menu">← Back</button>
+          <h2>Profile</h2>
+          <span></span>
+        </div>
+        <div id="pav" style="font-size: 4.5rem; line-height: 1"></div>
+        <input id="pn" maxlength="14" autocomplete="off" />
+        <div class="avs" id="avs"></div>
+        <div class="list" id="pst"></div>
+        <small style="text-align: center">Saved on this device only.</small>
+      </section>
+      <section class="scr" id="set">
+        <div class="top">
+          <button class="b sm" data-go="menu">← Back</button>
+          <h2>Settings</h2>
+          <span></span>
+        </div>
+        <div class="list" id="sl"></div>
+      </section>
+      <div id="modal"></div>
+    </div>
+    <div id="toast"></div>
+
+    <script>
+      const $ = (s) => document.querySelector(s),
+        $$ = (s) => [...document.querySelectorAll(s)];
+      const K = "trollquiz-v1";
+      let S = {
+        u: 1,
+        c: 0,
+        sc: 0,
+        h: 3,
+        d: {},
+        a: {},
+        snd: 1,
+        mus: 1,
+        day: "",
+        fl: 0,
+        lang: "id",
+        name: "",
+        av: "👾",
+      };
+      try {
+        Object.assign(S, JSON.parse(localStorage.getItem(K) || "{}"));
+      } catch (e) {}
+      const save = () => {
+        try {
+          localStorage.setItem(K, JSON.stringify(S));
+        } catch (e) {}
+      };
+      const mon = (m = "idle") =>
+        `<svg viewBox="0 0 100 100" class="mon ${m}"><path d="M18 34L28 6 44 28ZM82 34L72 6 56 28Z" fill="#ff7eb6" stroke="#2b1b54" stroke-width="3"/><defs><radialGradient id="mg" cx=".35" cy=".3"><stop offset="0" stop-color="#b79bff"/><stop offset="1" stop-color="#6a3de8"/></radialGradient></defs><path d="M50 20V8" stroke="#2b1b54" stroke-width="3"/><circle cx="50" cy="6" r="5" fill="#ffd93d" stroke="#2b1b54" stroke-width="2"/><ellipse cx="50" cy="58" rx="40" ry="36" fill="url(#mg)" stroke="#2b1b54" stroke-width="3"/><ellipse cx="30" cy="36" rx="9" ry="4" fill="#fff" opacity=".4"/><ellipse cx="50" cy="68" rx="25" ry="18" fill="#cdbbff"/><circle cx="20" cy="64" r="6" fill="#ff7eb6" opacity=".75"/><circle cx="80" cy="64" r="6" fill="#ff7eb6" opacity=".75"/><circle cx="35" cy="48" r="${m == "shock" ? 12 : 10}" fill="#fff" stroke="#2b1b54" stroke-width="2"/><circle cx="65" cy="48" r="${m == "shock" ? 12 : 10}" fill="#fff" stroke="#2b1b54" stroke-width="2"/><circle cx="${m == "laugh" ? 35 : 37}" cy="49" r="${m == "shock" ? 3 : 5}" fill="#2b1b54"/><circle cx="${m == "laugh" ? 65 : 63}" cy="49" r="${m == "shock" ? 3 : 5}" fill="#2b1b54"/>${m == "laugh" ? '<path d="M30 62Q50 90 70 62Z" fill="#2b1b54"/><path d="M40 70Q50 80 60 70Z" fill="#ff7eb6"/>' : m == "shock" ? '<ellipse cx="50" cy="72" rx="7" ry="9" fill="#2b1b54"/>' : '<path d="M34 66Q50 78 66 66" stroke="#2b1b54" stroke-width="4" fill="none" stroke-linecap="round"/>'}<path d="${cur < 15 ? "M26 38L44 36M74 38L56 36" : "M24 36L44 40M76 36L56 40"}" stroke="#2b1b54" stroke-width="4" stroke-linecap="round"/></svg>`;
+      let AC, bgm;
+      function beep(f, d = 0.12, t = "square", v = 0.07, dl = 0) {
+        if (!S.snd) return;
+        try {
+          AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+          const o = AC.createOscillator(),
+            g = AC.createGain(),
+            t0 = AC.currentTime + dl;
+          o.type = t;
+          o.frequency.value = f;
+          g.gain.setValueAtTime(v, t0);
+          g.gain.exponentialRampToValueAtTime(0.001, t0 + d);
+          o.connect(g);
+          g.connect(AC.destination);
+          o.start(t0);
+          o.stop(t0 + d);
+        } catch (e) {}
+      }
+      function playSound(src) {
+        if (!S.snd) return;
+        const audio = new Audio(src);
+        audio.preload = "auto";
+        audio.play().catch(() => {});
+      }
+      const sOk = () => playSound("Benar.mp3"),
+        sBad = () => playSound("salah.mp3"),
+        sTap = () => beep(700, 0.05);
+      function music() {
+        if (!bgm) {
+          bgm = new Audio("./Sound.mp3");
+          bgm.preload = "auto";
+          bgm.loop = true;
+          bgm.volume = 0.35;
+          bgm.addEventListener("error", () => {
+            toast("Backsound tidak dapat dimuat di browser ini.");
+          });
+        }
+        if (S.mus) {
+          bgm.play().catch(() => {
+            // Mobile browsers require music playback to follow a user gesture.
+          });
+        } else {
+          bgm.pause();
+          bgm.currentTime = 0;
+        }
+      }
+      let cur = 1,
+        lives = 3,
+        mist = 0,
+        hu = 0,
+        t0 = 0,
+        locked = 0,
+        dly = 0,
+        clean = [],
+        krot = null,
+        rotd = 0,
+        st = $("#stage");
+      const D = {
+        "Trust nothing. Tap to play!":
+          "Jangan percaya apa pun. Ketuk untuk main!",
+        "▶ PLAY": "▶ MAIN",
+        LEVELS: "LEVEL",
+        "DAILY CHALLENGE": "TANTANGAN HARIAN",
+        "🏆 Awards": "🏆 Penghargaan",
+        "⚙ Settings": "⚙ Pengaturan",
+        "← Back": "← Kembali",
+        Levels: "Level",
+        Awards: "Penghargaan",
+        Settings: "Pengaturan",
+        Profile: "Profil",
+        "Saved on this device only.": "Tersimpan hanya di perangkat ini.",
+        Player: "Pemain",
+        points: "poin",
+        coins: "koin",
+        "levels solved": "level selesai",
+        score: "skor",
+        "unlocked!": "terbuka!",
+        "🪙 Coins": "🪙 Koin",
+        "⭐ Score": "⭐ Skor",
+        "✅ Levels solved": "✅ Level selesai",
+        "💡 Hints": "💡 Petunjuk",
+        "Your name": "Namamu",
+        Paused: "Jeda",
+        Resume: "Lanjut",
+        "Restart level": "Ulangi level",
+        Hint: "Petunjuk",
+        "Got it": "Oke",
+        "HAHA! Game over!": "HAHA! Kalah!",
+        "The monster ate all your hearts.": "Monster memakan semua hatimu.",
+        "Try again": "Coba lagi",
+        "Level solved!": "Level selesai!",
+        "You escaped?!": "Kamu kabur?!",
+        "Next level ▶": "Level berikut ▶",
+        Replay: "Ulangi",
+        "🔊 Sound effects": "🔊 Efek suara",
+        "🎵 Music": "🎵 Musik",
+        "🗑 Reset all progress": "🗑 Reset semua progres",
+        OFF: "MATI",
+        "🌐 Language": "🌐 Bahasa",
+        "Keys: Esc pause · H hint · R rotate":
+          "Tombol: Esc jeda · H petunjuk · R putar",
+        "No hints left! Solve levels to earn more.":
+          "Petunjuk habis! Selesaikan level untuk dapat lagi.",
+        "Progress reset": "Progres direset",
+        "📅 Daily bonus: +50 coins!": "📅 Bonus harian: +50 koin!",
+        "First Win": "Menang Pertama",
+        "Solve any level": "Selesaikan level apa saja",
+        "Five Down": "Lima Beres",
+        "Solve 5 levels": "Selesaikan 5 level",
+        "Brain Master": "Master Otak",
+        "Solve all levels": "Selesaikan semua level",
+        Flawless: "Sempurna",
+        "Win with no mistakes or hints": "Menang tanpa salah dan petunjuk",
+        "Pocket Full": "Kantong Penuh",
+        "Collect 100 coins": "Kumpulkan 100 koin",
+        "Daily Brain": "Otak Harian",
+        "Finish a daily challenge": "Selesaikan tantangan harian",
+        Easy: "Mudah",
+        Medium: "Sedang",
+        Hard: "Sulit",
+        Impossible: "Mustahil",
+        "Too easy… or is it?": "Terlalu mudah… atau bukan?",
+        "Are you sure about that?": "Yakin dengan itu?",
+        "Think differently!": "Berpikirlah beda!",
+        "I didn’t put a trap here. Probably.":
+          "Aku tidak pasang jebakan di sini. Mungkin.",
+        "HAHA! WRONG!": "HAHA! SALAH!",
+        "Nope! Try thinking differently!": "Bukan! Coba berpikir beda!",
+        "You actually solved it?!": "Kamu benar-benar bisa?!",
+        "Hands off": "Jangan sentuh",
+        "Biggest thing": "Benda terbesar",
+        "Make it rain": "Bikin hujan",
+        "Easy math": "Hitungan mudah",
+        "Locked door": "Pintu terkunci",
+        "Star thief": "Pencuri bintang",
+        "Wait!": "Tunggu!",
+        "Flip it": "Balikkan",
+        "Invisible cat": "Kucing gaib",
+        "Escape the quiz": "Kabur dari kuis",
+        "Don’t touch the red button.": "Jangan sentuh tombol merah.",
+        "Tap the biggest object.": "Ketuk benda terbesar.",
+        "The sky is sunny. Make it rain!": "Langit cerah. Bikin hujan!",
+        "What is 2 + 2 ?": "Berapa 2 + 2 ?",
+        FOUR: "EMPAT",
+        "Open the door.": "Buka pintunya.",
+        "Don’t let the monster win!": "Jangan biarkan monster menang!",
+        "Don’t do anything.": "Jangan lakukan apa-apa.",
+        "Nothing here will budge. Flip the situation!":
+          "Tidak ada yang bergeser. Balikkan keadaan!",
+        "Find the invisible cat.": "Temukan kucing tak terlihat.",
+        "Escape! Use the EXIT.": "Kabur! Pakai tombol EXIT.",
+        "Read the instruction again. Do you really have to obey it?":
+          "Baca lagi perintahnya. Memangnya harus dituruti?",
+        "Size depends on how close you look. Zoom in with +, pinch or scroll.":
+          "Ukuran tergantung seberapa dekat kamu melihat. Perbesar dengan +, cubit, atau scroll.",
+        "Clouds hold water. Drag the cloud around hard, or tap it again and again.":
+          "Awan menyimpan air. Seret awan dengan kuat, atau ketuk berkali-kali.",
+        "Is every option a number?": "Apakah semua pilihan berupa angka?",
+        "Doors can be moved too. Try dragging the door itself.":
+          "Pintu juga bisa digeser. Coba seret pintunya.",
+        "The monster only wants the star. Take it far away: off the edge of the screen!":
+          "Monster cuma mau bintangnya. Bawa jauh ke tepi layar!",
+        "Seriously. Don’t touch, tap or press anything for a few seconds.":
+          "Serius. Jangan sentuh atau tekan apa pun beberapa detik.",
+        "Use the rotate button (or press R, or turn your phone upside down).":
+          "Pakai tombol putar (atau tekan R, atau balik ponselmu).",
+        "Something is sparkling near the floor…":
+          "Ada yang berkilau dekat lantai…",
+        "That EXIT button looks fake. Where is a real way out?":
+          "Tombol EXIT itu palsu. Di mana jalan keluar sebenarnya?",
+        "You touched it?! Rude… and correct!":
+          "Kamu sentuh?! Kurang ajar… tapi benar!",
+        "Safe? Nothing is safe here!": "Aman? Tidak ada yang aman di sini!",
+        "That’s only big from far away!": "Itu cuma besar kalau dari jauh!",
+        "Up close, the ant is a giant!": "Dari dekat, semut itu raksasa!",
+        "Hmm, it’s so tiny… look closer!":
+          "Hmm, kecil banget… lihat lebih dekat!",
+        "Something’s grumbling up there…": "Ada yang bergemuruh di atas sana…",
+        "It’s raining! Cloud power!": "Hujan! Kekuatan awan!",
+        "FOUR… is the word! Sneaky!": "EMPAT… itu katanya! Licik!",
+        "Correct… but too obvious! Read again!":
+          "Benar… tapi terlalu gampang! Baca lagi!",
+        "HAHA! Even I know that’s wrong!": "HAHA! Aku saja tahu itu salah!",
+        "It was never locked!": "Pintunya tidak pernah terkunci!",
+        "The key doesn’t even fit!": "Kuncinya tidak cocok!",
+        "The monster stole the star!": "Monster mencuri bintangnya!",
+        "The star escaped!": "Bintangnya kabur!",
+        "You tapped! That’s doing something!":
+          "Kamu mengetuk! Itu melakukan sesuatu!",
+        "…still waiting…": "…masih menunggu…",
+        "Doing nothing: expert level!": "Tidak melakukan apa-apa: level ahli!",
+        "Wait… everything is upside down!": "Tunggu… semuanya terbalik!",
+        "Gravity is just a suggestion!": "Gravitasi cuma saran!",
+        "Too heavy! It won’t move.": "Terlalu berat! Tidak mau bergerak.",
+        "Nothing in there but dust!": "Cuma ada debu di situ!",
+        "Just an empty room…": "Cuma ruangan kosong…",
+        "Found the cat! It was camouflaged!": "Kucingnya ketemu! Ia menyamar!",
+        "That EXIT is totally fake!": "EXIT itu palsu banget!",
+        "You escaped… the quiz?!": "Kamu kabur… dari kuis?!",
+        "You pressed a key! That counts as doing something!":
+          "Kamu menekan tombol! Itu juga melakukan sesuatu!",
+        RED: "MERAH",
+        "Totally safe ✓": "Aman banget ✓",
+        "🔄 Rotate": "🔄 Putar",
+        "(shh…)": "(sst…)",
+        "What is 2 + 2 ?": "Berapa 2 + 2 ?",
+        Riddle: "Tebak-tebakan",
+        "Riddle time! Pick the answer.":
+          "Waktunya tebak-tebakan! Pilih jawabannya.",
+        "Odd one out": "Cari yang beda",
+        "Tap the one that looks different.": "Ketuk yang terlihat berbeda.",
+        "Look for the tiny difference.": "Cari perbedaan kecil.",
+        "That one is identical to the others!":
+          "Yang itu sama saja dengan yang lain!",
+        "Math trap": "Jebakan hitung",
+        "Pick a WRONG answer!": "Pilih jawaban yang SALAH!",
+        "Solve it. Read carefully!": "Hitung. Baca baik-baik!",
+        "Any answer except the correct one wins.":
+          "Semua jawaban selain yang benar menang.",
+        "Double-check the question.": "Periksa lagi soalnya.",
+        "Do the opposite": "Lakukan kebalikannya",
+        "Tap anywhere EXCEPT the button.": "Ketuk di mana saja KECUALI tombol.",
+        "TAP ME": "KETUK AKU",
+        "The button is a trap. Where else can you tap?":
+          "Tombolnya jebakan. Di mana lagi bisa diketuk?",
+        "You tapped the button!": "Kamu mengetuk tombolnya!",
+        "Drag it": "Seret",
+        "Drag the gift into the gray box.": "Seret hadiah ke kotak abu-abu.",
+        "Which box is gray?": "Kotak mana yang abu-abu?",
+        "Wrong box!": "Kotak salah!",
+        Stillness: "Diam",
+        "Do absolutely nothing.": "Jangan lakukan apa pun.",
+        "Tap storm": "Badai ketukan",
+        "Tap fast, tap often!": "Ketuk cepat, ketuk terus!",
+        "Too slow!": "Kelamaan!",
+        "Are you SURE? Really sure?": "Yakin? Beneran yakin?",
+        "Seriously?! Again?!": "Serius?! Lagi?!",
+        "Is your finger okay?": "Jarimu baik-baik saja?",
+        "Maybe try with your eyes open?": "Coba main sambil melek?",
+        "Psst… one little tap won’t hurt…":
+          "Psst… ketuk sekali aja nggak apa-apa…",
+        "Psst! Tap it. I dare you!": "Psst! Ketuk aja. Berani?",
+        "Hint: try harder. You’re welcome!":
+          "Petunjuk: usaha lebih keras. Sama-sama!",
+        "Just kidding! You won!": "Bercanda! Kamu menang!",
+        "Aw, you closed my ad!": "Yah, kamu menutup iklanku!",
+        "Haha! That’s a fake ad!": "Haha! Itu iklan palsu!",
+        "Nope! Catch me if you can!": "Hehe! Tangkap aku kalau bisa!",
+        "Almost! Once more!": "Hampir! Sekali lagi!",
+        "Chase me!": "Kejar aku!",
+        "Verify you\u2019re human": "Buktikan kamu manusia",
+        "Select all squares with a CAT": "Pilih semua kotak yang ada KUCING",
+        Verify: "Verifikasi",
+        "Daily login gift!": "Hadiah login harian!",
+        "Claim 1000 free coins!": "Klaim 1000 koin gratis!",
+        CLAIM: "KLAIM",
+        "No thanks": "Tidak, makasih",
+        "Just kidding! There is no gift. \ud83d\ude08":
+          "Bercanda! Nggak ada hadiah. \ud83d\ude08",
+        "Enjoying the game?": "Suka sama game ini?",
+        "Please rate us!": "Yuk beri bintang!",
+        "Maybe later": "Nanti saja",
+        "Maybe later? Not that easy \ud83d\ude1d":
+          "Nanti? Nggak semudah itu \ud83d\ude1d",
+        "Thank you! \ud83e\udd70": "Makasih! \ud83e\udd70",
+        "Loading level\u2026": "Memuat level\u2026",
+        "Connection lost": "Koneksi terputus",
+        "Reconnecting\u2026": "Menyambung ulang\u2026",
+        "It budged a little… pull harder!":
+          "Bergeser sedikit… tarik lebih kuat!",
+        "Asset gallery": "Galeri aset",
+        "🎨 Assets": "🎨 Aset",
+        "Invite friends": "Undang teman",
+        "Coming soon": "Segera hadir",
+        "👥 Invite friends (+3 lives)": "👥 Undang teman (+3 nyawa)",
+        "Every friend who logs in through your link gives you 3 lives!":
+          "Setiap teman yang login lewat link-mu memberi 3 nyawa!",
+        "📤 Share link": "📤 Bagikan link",
+        "🔄 Check friends": "🔄 Cek teman",
+        "Friends joined:": "Teman bergabung:",
+        "Friend tracking is only active when you are logged in to Claude.":
+          "Pelacakan teman hanya aktif jika kamu login Claude.",
+        "Link copied!": "Link disalin!",
+        "No new friends yet": "Belum ada teman baru",
+        "Could not check friends": "Gagal mengecek teman",
+        "Friend tracking unavailable here":
+          "Pelacakan teman tidak tersedia di sini",
+        "Your friend logged in!": "Temanmu sudah login!",
+        "Lives added:": "Nyawa ditambah:",
+        "Joined through a friend’s invite! 🎉":
+          "Bergabung lewat undangan teman! 🎉",
+        "Upload follow proof": "Upload bukti follow",
+        "Send a screenshot showing you follow @_atenntxs. The system checks it’s new and real.":
+          "Kirim screenshot yang menunjukkan kamu follow @_atenntxs. Sistem mengecek apakah fotonya baru dan asli.",
+        "📤 Send proof": "📤 Kirim bukti",
+        "Pick a screenshot first!": "Pilih screenshot dulu!",
+        "Checking your proof…": "Memeriksa buktimu…",
+        "Rejected!": "Ditolak!",
+        "Please choose an image file.": "Pilih file gambar.",
+        "Image is too big (max 6 MB).": "Gambar terlalu besar (maks 6 MB).",
+        "Could not read that image.": "Gambar tidak bisa dibaca.",
+        "You already used this photo! Nice try 😈":
+          "Foto ini sudah pernah kamu pakai! Nice try 😈",
+        "This photo was already used by someone else! Nice try 😈":
+          "Foto ini sudah dipakai orang lain! Nice try 😈",
+        "Verification failed:": "Verifikasi gagal:",
+        "🚨 Unfollow detected!": "🚨 Unfollow terdeteksi!",
+        "Our system detected that you UNFOLLOWED @_atenntxs! Upload new proof or lose a life.":
+          "Sistem kami mendeteksi kamu UNFOLLOW @_atenntxs! Upload bukti baru atau nyawa hangus.",
+        "📤 Send new proof": "📤 Kirim bukti baru",
+        "I did NOT unfollow!": "Aku NGGAK unfollow!",
+        "Scanning photo…": "Memindai foto…",
+        "🚨 SAME PHOTO!": "🚨 FOTO SAMA!",
+        "This photo is identical to your old one. Busted! …Just kidding 😈 You’re safe. Go play!":
+          "Foto ini identik dengan yang lama. Ketahuan! …Bercanda 😈 Kamu aman. Ayo main!",
+        "Proof? Where is the proof? 🧐 …Fine, you’re safe.":
+          "Mana buktinya? 🧐 …Ya sudah, kamu aman.",
+        "Play on": "Lanjut main",
+        "+5 lives ❤️❤️❤️❤️❤️": "+5 nyawa ❤️❤️❤️❤️❤️",
+        "Lives restored: 3 ❤️": "Nyawa dipulihkan: 3 ❤️",
+        "Oops, not quite. Try again!": "Ups, belum tepat. Coba lagi!",
+        "Almost! You can do it!": "Hampir! Kamu pasti bisa!",
+        "Time is up!": "Waktu habis!",
+        "Hurry up!! 😈": "Cepetan!! 😈",
+        "Out of lives!": "Nyawa habis!",
+        "Follow the developer on Instagram and get 5 free lives!":
+          "Follow Instagram developer dan dapatkan 5 nyawa gratis!",
+        "Top up lives now! 💎 Special offer today only!":
+          "Top up nyawa sekarang! 💎 Promo hari ini saja!",
+        "Processing payment…": "Memproses pembayaran…",
+        "Contacting bank…": "Menghubungi bank…",
+        "Almost there… 97%…": "Hampir selesai… 97%…",
+        "Payment failed. Just kidding, there was never any top up! 😈 Restarting the app…":
+          "Pembayaran gagal. Bercanda, memang nggak ada top up! 😈 Memulai ulang aplikasi…",
+        "Thanks for following!": "Makasih sudah follow!",
+        "Verifying follow…": "Memverifikasi follow…",
+        "No lives left!": "Nyawa habis total!",
+        "Come back tomorrow and you’ll get 5 lives. See you!":
+          "Kembali besok dan kamu dapat 5 nyawa. Sampai jumpa!",
+        "Welcome back! 5 lives!": "Selamat datang kembali! 5 nyawa!",
+        Continue: "Lanjut",
+        Menu: "Menu",
+        "Good luck! Take your time.": "Semangat! Pelan-pelan saja.",
+        "Nice and easy. You got this!": "Santai saja. Kamu pasti bisa!",
+        "A relaxing puzzle game for everyone. Tap to start.":
+          "Game teka-teki santai untuk semua orang. Ketuk untuk mulai.",
+        "Loading next level… oops, wrong file!":
+          "Memuat level berikut… ups, salah file!",
+        "Hint.exe has stopped working…": "Hint.exe berhenti bekerja…",
+        "⚠ Error 404: hint not found": "⚠ Error 404: petunjuk tidak ditemukan",
+        "Back? Not that easy!": "Kembali? Nggak semudah itu!",
+        "Surprise! It was never locked!": "Kejutan! Ternyata nggak dikunci!",
+        "Huff… huff… I’m tired…": "Hosh… hosh… capek…",
+        "Pause? Not today!": "Jeda? Hari ini nggak!",
+        "⏸ Paused! …just kidding.": "⏸ Jeda! …bercanda.",
+      };
+      const tr = (s) => (S.lang == "id" && D[s]) || s,
+        f = (x) => (typeof x == "function" ? x() : tr(x));
+      function loc() {
+        $$("#app *").forEach((e) => {
+          if (e.children.length || !e.textContent.trim()) return;
+          if (e.dataset.tx !== e.textContent) e.dataset.en = e.textContent;
+          const v = tr(e.dataset.en);
+          e.textContent = v;
+          e.dataset.tx = v;
+        });
+      }
+      function toast(t) {
+        const e = $("#toast");
+        e.textContent = tr(t);
+        e.classList.add("on");
+        clearTimeout(toast.t);
+        toast.t = setTimeout(() => e.classList.remove("on"), 2200);
+      }
+      function go(id) {
+        $$(".scr").forEach((s) => s.classList.toggle("on", s.id == id));
+        $("#modal").className = "";
+        if (id != "game") runClean();
+        $$(".top .b").forEach((b) => {
+          b.style.translate = "";
+          b.style.rotate = "";
+        });
+        $$(".m0").forEach((e) => (e.innerHTML = mon()));
+        if (id == "menu") {
+          $("#coins").textContent = S.c;
+          const n = Object.keys(S.d).length;
+          $("#pb").style.width = n + "%";
+          $("#pt").textContent =
+            n +
+            "/" +
+            MAX_LEVELS +
+            tr("levels solved") +
+            " · " +
+            tr("score") +
+            " " +
+            S.sc;
+          $("#sndb").textContent = S.snd ? "🔊" : "🔇";
+          $("#pbtn").textContent = S.av + " " + (S.name || tr("Player"));
+          if ((A.d || 0) >= 2) {
+            const p = $("[data-a=play]");
+            p.style.translate = "";
+            p.classList.remove("legs", "tired");
+          }
+          menuShuffle();
+        }
+        if (id == "lv") {
+          A.fk = S.u >= 3 ? 3 + Math.floor(Math.random() * (S.u - 2)) : 0;
+        }
+        if (id == "lv")
+          $("#lvg").innerHTML = L.map(
+            (l, i) =>
+              `<button class="b lvb ${["sk", "cy", "or", "pk"][["Easy", "Medium", "Hard", "Impossible"].indexOf(l.g)]}" ${i + 1 > S.u ? "disabled" : ""} data-a="lvl" data-v="${i + 1}">${i + 1 > S.u || i + 1 == A.fk ? "🔒" : i + 1}<small>${S.d[i + 1] ? "✅ " : ""}${tr(l.g)}</small></button>`,
+          ).join("");
+        if (id == "ach")
+          $("#al").innerHTML = AL.map(
+            (a) =>
+              `<div class="item ${S.a[a[0]] ? "" : "off"}"><span style="font-size:2rem">${a[1]}</span><div><b>${a[2]}</b><br><small>${a[3]}</small></div></div>`,
+          ).join("");
+        if (id == "set")
+          $("#sl").innerHTML =
+            `<div class="item"><span>🔊 Sound effects</span><button class="b sm" style="margin-left:auto" data-a="tsnd">${S.snd ? "ON" : "OFF"}</button></div><div class="item"><span>🎵 Music</span><button class="b sm" style="margin-left:auto" data-a="tmus">${S.mus ? "ON" : "OFF"}</button></div><div class="item"><span>🗑 Reset all progress</span><button class="b sm rd" style="margin-left:auto" data-a="reset">Reset</button></div><div class="item"><span>🌐 Language</span><button class="b sm" style="margin-left:auto" data-a="lang">${S.lang == "id" ? "Bahasa Indonesia" : "English"}</button></div><small style="text-align:center">Keys: Esc pause · H hint · R rotate</small>`;
+        if (id == "prof") renderProf();
+        icons();
+        loc();
+      }
+      function modal(h) {
+        const m = $("#modal");
+        if (/Out of lives!|No lives left!/.test(h))
+          h +=
+            '<button class="b cy wide" data-a="inv">👥 Invite friends (+3 lives)</button>';
+        m.innerHTML = '<div class="card">' + h + "</div>";
+        m.className = "on";
+        loc();
+      }
+      const A = {
+        start() {
+          music();
+          if ((A.cp || 0) >= 9) {
+            go("menu");
+            return;
+          }
+          captcha();
+        },
+        vf() {
+          A.cp = (A.cp || 0) + 1;
+          if (A.cp < 3) {
+            toast(
+              pick([
+                tt(
+                  "Salah! Itu bukan semuanya. Ulangi.",
+                  "Wrong! That’s not all of them. Try again.",
+                ),
+                tt(
+                  "Hmm, robot juga bisa pilih begitu \ud83e\udd16",
+                  "Hmm, a robot could pick that too \ud83e\udd16",
+                ),
+                tt(
+                  "Kurang teliti! Coba lagi.",
+                  "Not careful enough! Try again.",
+                ),
+              ]),
+            );
+            captcha();
+          } else {
+            A.cp = 9;
+            go("menu");
+            toast(
+              tt(
+                "Oke\u2026 kamu manusia. Kayaknya. \ud83e\udd28",
+                "Fine\u2026 you’re human. Probably. \ud83e\udd28",
+              ),
+            );
+            setTimeout(gift, 900);
+          }
+        },
+        claim() {
+          A.cg = (A.cg || 0) + 1;
+          const b = $("#cl");
+          if (A.cg < 3 && b) {
+            b.style.translate = `${(Math.random() * 140 - 70) | 0}px ${(Math.random() * 40 - 20) | 0}px`;
+            toast(
+              tt(
+                "Hampir! Coba lagi \ud83d\ude1d",
+                "Almost! Try again \ud83d\ude1d",
+              ),
+            );
+          } else {
+            A.cg = 0;
+            modal(
+              `<div class='mascot'>${mon("laugh")}</div><h2>Just kidding! There is no gift. \ud83d\ude08</h2><button class='b pk wide' data-a='close'>OK</button>`,
+            );
+          }
+        },
+        igdone() {
+          setTimeout(proofModal, 1500);
+        },
+        pm() {
+          proofModal();
+        },
+        async sendp() {
+          const f = $("#pf") && $("#pf").files[0];
+          if (!f) return toast("Pick a screenshot first!");
+          modal(
+            `<div class='mascot'>${mon()}</div><h2>Checking your proof…</h2><div class='prog' style='width:100%'><i style='width:100%;animation:rn .6s linear infinite;background:repeating-linear-gradient(45deg,#35d6ed 0 10px,#7c4dff 10px 20px)'></i></div>`,
+          );
+          const r = await chkProof(f);
+          if (r.ok) {
+            S.go = 1;
+            S.dead = 0;
+            S.big = 5;
+            S.ig = 1;
+            save();
+            modal(
+              `<div class='mascot'>${mon("shock")}</div><h2>Thanks for following!</h2><p>+5 lives ❤️❤️❤️❤️❤️</p><button class='b pk wide' data-a='again'>Continue</button>`,
+            );
+          } else
+            modal(
+              `<div class='mascot'>${mon("laugh")}</div><h2>Rejected!</h2><p>${tr(r.msg)}</p><button class='b pk wide' data-a='pm'>Try again</button><button class='b or wide' data-go='menu'>Menu</button>`,
+            );
+        },
+        inv() {
+          modal(
+            `<div class='mascot'>${mon("shock")}</div><h2>Coming soon</h2><p>${tr("Coming soon")}. Fitur undang teman sedang kami siapkan.</p><button class='b pk wide' data-a='close'>OK</button>`,
+          );
+        },
+        share() {
+          try {
+            if (navigator.share)
+              navigator
+                .share({
+                  title: "Smart Quiz",
+                  text: "Play Smart Quiz with me!",
+                  url: lnk(),
+                })
+                .catch(() => {});
+            else
+              navigator.clipboard
+                .writeText(lnk())
+                .then(() => toast("Link copied!"));
+          } catch (e) {
+            toast(lnk());
+          }
+        },
+        chk() {
+          checkRefs(1);
+        },
+        unfs() {
+          const f = $("#pf") && $("#pf").files[0];
+          if (!f) return toast("Pick a screenshot first!");
+          modal(
+            `<div class='mascot'>${mon()}</div><h2>Scanning photo…</h2><div class='prog' style='width:100%'><i style='width:100%;animation:rn .6s linear infinite;background:repeating-linear-gradient(45deg,#ff9248 0 10px,#ff7eb6 10px 20px)'></i></div>`,
+          );
+          setTimeout(
+            () =>
+              modal(
+                `<div class='mascot'>${mon("laugh")}</div><h2>🚨 SAME PHOTO!</h2><p>This photo is identical to your old one. Busted! …Just kidding 😈 You’re safe. Go play!</p><button class='b pk wide' data-a='pend'>Play on</button>`,
+              ),
+            2600,
+          );
+        },
+        unfn() {
+          modal(
+            `<div class='mascot'>${mon("laugh")}</div><h2>🧐</h2><p>Proof? Where is the proof? 🧐 …Fine, you’re safe.</p><button class='b pk wide' data-a='pend'>Play on</button>`,
+          );
+        },
+        pend() {
+          NP = 1;
+          startLevel(PN[0], PN[1], PN[2]);
+        },
+        later2() {
+          A.l2 = (A.l2 || 0) + 1;
+          const b = $("#nt");
+          if (A.l2 < 3 && b) {
+            b.style.translate = `${(Math.random() * 160 - 80) | 0}px ${(Math.random() * 50 - 25) | 0}px`;
+            toast("Maybe later? Not that easy \ud83d\ude1d");
+          } else {
+            A.l2 = 0;
+            A.pend();
+          }
+        },
+        igdone0() {
+          setTimeout(() => {
+            S.go = 1;
+            S.dead = 0;
+            S.big = 5;
+            save();
+            modal(
+              `<div class="mascot">${mon("shock")}</div><h2>Thanks for following!</h2><p>+5 lives ❤️❤️❤️❤️❤️</p><button class="b pk wide" data-a="again">Continue</button>`,
+            );
+          }, 3000);
+        },
+        topup() {
+          modal(
+            `<div class="mascot">${mon()}</div><h2>Processing payment…</h2><div class="prog" style="width:100%"><i id="tp" style="width:0;transition:width 3s linear"></i></div><p id="tpt">Contacting bank…</p>`,
+          );
+          setTimeout(() => {
+            const e = $("#tp");
+            if (e) e.style.width = "97%";
+          }, 60);
+          setTimeout(() => {
+            const e = $("#tpt");
+            if (e) {
+              e.textContent = tr("Almost there… 97%…");
+            }
+          }, 2200);
+          setTimeout(() => {
+            S.go = 2;
+            S.dead = 0;
+            save();
+            modal(
+              `<div class="mascot">${mon("laugh")}</div><h2>Error 500</h2><p>Payment failed. Just kidding, there was never any top up! 😈 Restarting the app…</p><div class="prog" style="width:100%"><i id="rs" style="width:0;transition:width 2.5s linear"></i></div>`,
+            );
+            setTimeout(() => {
+              const e = $("#rs");
+              if (e) e.style.width = "100%";
+            }, 60);
+            setTimeout(() => {
+              go("splash");
+              setTimeout(() => {
+                startLevel(cur, 1, dly);
+                toast("Lives restored: 3 ❤️");
+              }, 1700);
+            }, 3000);
+          }, 3400);
+        },
+        lang() {
+          S.lang = S.lang == "id" ? "en" : "id";
+          save();
+          go($(".scr.on").id);
+        },
+        av(v) {
+          S.av = v;
+          save();
+          go("prof");
+        },
+        snd() {
+          S.snd = S.snd ? 0 : 1;
+          save();
+          go("menu");
+        },
+        tsnd() {
+          S.snd = S.snd ? 0 : 1;
+          save();
+          go("set");
+        },
+        tmus() {
+          S.mus = S.mus ? 0 : 1;
+          save();
+          music();
+          go("set");
+        },
+        reset() {
+          S = {
+            u: 1,
+            c: 0,
+            sc: 0,
+            h: 3,
+            d: {},
+            a: {},
+            snd: S.snd,
+            mus: S.mus,
+            day: "",
+            fl: 0,
+            lang: S.lang,
+            name: S.name,
+            av: S.av,
+          };
+          save();
+          toast("Progress reset");
+          go("menu");
+        },
+        play() {
+          const b = $("[data-a=play]");
+          if (b.dataset.run) return toast("Chase me!");
+          if ((A.d = A.d || 0) < 2) {
+            A.d++;
+            runAway(b);
+            return toast(
+              A.d < 2 ? "Nope! Catch me if you can!" : "Almost! Once more!",
+            );
+          }
+          b.style.translate = "";
+          b.classList.remove("legs", "tired");
+          startLevel(Math.min(S.u, 100), 1);
+        },
+        lvl(v) {
+          if (+v == A.fk) toast("Surprise! It was never locked!");
+          startLevel(+v, 1);
+        },
+        daily() {
+          dly = 1;
+          startLevel((Math.floor(Date.now() / 864e5) % 100) + 1, 1, 1);
+        },
+        pause() {
+          if (cur >= 15 && !locked && Math.random() < 0.25) {
+            say("Pause? Not today!", "laugh");
+            return toast("⏸ Paused! …just kidding.");
+          }
+          modal(
+            `<div class="mascot">${mon()}</div><h2>Paused</h2><button class="b pk wide" data-a="close" data-v="1">Resume</button><button class="b cy wide" data-a="restart">Restart level</button><button class="b or wide" data-go="menu">Menu</button>`,
+          );
+        },
+        close(v) {
+          $("#modal").className = "";
+          if (v && [6, 7].includes(cur)) run();
+        },
+        restart() {
+          run();
+        },
+        next() {
+          const g2 = () => {
+            if (cur >= 15 && Math.random() < 0.3) {
+              toast("Loading next level… oops, wrong file!");
+              return startLevel(cur - 1, 0);
+            }
+            startLevel(cur + 1, 0);
+          };
+          if (Math.random() < 0.4) fakeLoad(g2);
+          else g2();
+        },
+        again() {
+          startLevel(cur, 1, dly);
+        },
+        hint() {
+          if (locked) return;
+          if (cur >= 10 && Math.random() < 0.25) {
+            say("Hint.exe has stopped working…", "laugh");
+            return toast("⚠ Error 404: hint not found");
+          }
+          if (S.h < 1)
+            return toast("No hints left! Solve levels to earn more.");
+          const tl = Math.random() < 0.3;
+          if (!tl) {
+            S.h--;
+            hu++;
+          }
+          save();
+          hud();
+          modal(
+            `<div class="mascot">${mon("shock")}</div><h2>Hint</h2><p>${tl ? tr("Hint: try harder. You’re welcome!") : f(L[cur - 1].h)}</p><button class="b pk" data-a="close" data-v="1">Got it</button>`,
+          );
+        },
+        rot() {
+          rot();
+        },
+      };
+      document.addEventListener("pointerdown", () => {
+        if (S.mus) music();
+      });
+      document.addEventListener("click", (e) => {
+        const t = e.target.closest("[data-a],[data-go]");
+        if (!t) return;
+        sTap();
+        if (t.dataset.go) {
+          if (
+            t.textContent.startsWith("←") &&
+            (A.bk = A.bk || 0) < 2 &&
+            Math.random() < 0.6
+          ) {
+            A.bk++;
+            t.style.translate = `${(Math.random() * 120 - 60) | 0}px ${(Math.random() * 160 + 20) | 0}px`;
+            t.style.rotate = ((Math.random() * 40 - 20) | 0) + "deg";
+            return toast("Back? Not that easy!");
+          }
+          A.bk = 0;
+          go(t.dataset.go);
+        } else A[t.dataset.a](t.dataset.v);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (!$("#game").classList.contains("on") || $("#modal").className)
+          return;
+        if (e.key == "Escape") A.pause();
+        else if (e.key.toLowerCase() == "h") A.hint();
+        else if (e.key.toLowerCase() == "r" && krot) krot();
+        else if (cur == 7 && !locked && e.key.length > 0)
+          lose("You pressed a key! That counts as doing something!");
+      });
+
+      function say(t, m = "idle") {
+        $("#sp").textContent = tr(t);
+        $("#gm").innerHTML = mon(m);
+        clearTimeout(say.t);
+        if (m != "idle")
+          say.t = setTimeout(() => ($("#gm").innerHTML = mon()), 2200);
+      }
+      function trollNudge() {
+        const buttons = $$("#stage .opts .b, #stage .g4 .b, #stage .rw .b");
+        if (!buttons.length) return;
+        buttons.forEach((b, i) => {
+          const angle = ((i % 2 ? -1 : 1) * (4 + Math.random() * 8)).toFixed(1);
+          b.style.transition = "transform .18s ease";
+          b.style.transform = `rotate(${angle}deg) translate(${(Math.random() * 8 - 4).toFixed(1)}px, ${(Math.random() * 6 - 3).toFixed(1)}px)`;
+          setTimeout(() => {
+            b.style.transform = "";
+            b.style.transition = "";
+          }, 850);
+        });
+      }
+      function trollTaunt() {
+        if (mist == 2) {
+          trollNudge();
+          toast(tt("Jawabanmu hampir benar… hampir banget 😈", "Your answer was almost right… almost 😈"));
+        } else if (mist == 3) {
+          trollNudge();
+          say(
+            tt("Aku mulai kasihan… bohong. Coba lagi.", "I almost feel bad… nope. Try again."),
+            "laugh",
+          );
+        } else if (mist >= 4) {
+          say(
+            tt("Ini bukan kuis lagi, ini hubungan toxic.", "This is no longer a quiz. It’s a toxic relationship."),
+            "laugh",
+          );
+          toast(tt("Kamu boleh menyerah. Tapi aku akan ingat.", "You may quit. But I will remember.")); 
+        }
+      }
+      const pick = (a) => a[(Math.random() * a.length) | 0];
+      function later(f, ms) {
+        const id = setTimeout(f, ms);
+        clean.push(() => clearTimeout(id));
+      }
+      function runClean() {
+        clean.forEach((f) => f());
+        clean = [];
+        window.ondevicemotion = window.ondeviceorientation = null;
+        krot = null;
+      }
+      function hud() {
+        const l = L[cur - 1];
+        $("#ttl").textContent =
+          (dly ? "📅 " : "") + cur + ". " + f(l.t) + " · " + tr(l.g);
+        $("#liv").innerHTML =
+          ic("h").repeat(lives) + ic("hx").repeat(Math.max(0, 3 - lives));
+        $("#scr").innerHTML = ic("s") + " " + S.sc;
+        $("#hb").innerHTML = ic("b") + S.h;
+      }
+      function startLevel(n, fresh, d) {
+        if (S.nx) {
+          if (Date.now() < S.nx) return blocked();
+          S.nx = 0;
+          S.go = 0;
+          S.dead = 0;
+          S.big = 5;
+          save();
+        }
+        if (S.dead) return over();
+        if (
+          S.ig &&
+          n >= 12 &&
+          S.prd != new Date().toDateString() &&
+          Math.random() < 0.15
+        ) {
+          S.prd = new Date().toDateString();
+          save();
+          PN = [n, fresh, d];
+          return unf();
+        }
+        if (NP) NP = 0;
+        else if (n >= 8 && Math.random() < 0.14) {
+          PN = [n, fresh, d];
+          return pick([rate, offline])();
+        }
+        cur = n;
+        if (fresh) {
+          lives = S.big || 3;
+          if (S.big) toast("Welcome back! 5 lives!");
+          S.big = 0;
+          save();
+        }
+        if (!d) dly = 0;
+        mist = 0;
+        hu = 0;
+        t0 = Date.now();
+        $("#modal").className = "";
+        $$(".scr").forEach((s) => s.classList.toggle("on", s.id == "game"));
+        run();
+      }
+      let TL = 40,
+        tm = 40,
+        tid;
+      const BG = [
+        "linear-gradient(#bfe9ff,#fff4c9)",
+        "linear-gradient(#ffd6ec,#ffe9b0)",
+        "linear-gradient(#c9f3ff,#d8c9ff)",
+        "linear-gradient(#d4ffd9,#fff4b8)",
+        "linear-gradient(#ffe0c2,#ffc2e0)",
+        "linear-gradient(#c2d8ff,#e7c2ff)",
+        "linear-gradient(#fff1a8,#ffb38a)",
+        "linear-gradient(#b8f2e6,#aed9ff)",
+        "linear-gradient(#e0c3fc,#8ec5fc)",
+        "linear-gradient(#ffd1ff,#fad0c4)",
+      ];
+      function updTm() {
+        $("#tmr").innerHTML = ic("t") + " " + Math.max(0, tm);
+        const b = $("#tbar");
+        b.firstElementChild.style.width = (Math.max(0, tm) / TL) * 100 + "%";
+        b.classList.toggle("hot", tm <= 8);
+      }
+      function tick() {
+        if (
+          locked ||
+          $("#modal").className ||
+          !$("#game").classList.contains("on")
+        )
+          return;
+        tm -=
+          cur >= 60 && Math.random() < 0.12
+            ? 3
+            : cur >= 30 && Math.random() < 0.15
+              ? 2
+              : 1;
+        updTm();
+        if (cur >= 5 && Date.now() - lastAct > 12000) {
+          lastAct = Date.now();
+          say(
+            pick([
+              tt("Halo? Masih hidup?", "Hello? Still alive?"),
+              tt(
+                "Mikirnya lama amat\u2026 \ud83d\udc0c",
+                "Thinking this slowly\u2026 \ud83d\udc0c",
+              ),
+              tt(
+                "Sini kubisikin jawabannya\u2026 eh nggak jadi \ud83d\ude1c",
+                "Let me whisper the answer\u2026 nah \ud83d\ude1c",
+              ),
+            ]),
+            "laugh",
+          );
+        }
+        if (tm <= 0) lose("Time is up!");
+        else if (tm <= 5 && tm > 3) say("Hurry up!! 😈", "laugh");
+      }
+      function run() {
+        runClean();
+        locked = 0;
+        rotd = 0;
+        TL = tm =
+          L[cur - 1].tl ||
+          (cur <= 20 ? 40 : cur <= 50 ? 30 : cur <= 85 ? 25 : 20);
+        clearInterval(tid);
+        tid = setInterval(tick, 1000);
+        clean.push(() => clearInterval(tid));
+        updTm();
+        $("#modal").className = "";
+        st.onpointerdown =
+          st.onpointermove =
+          st.onpointerup =
+          st.onpointercancel =
+          st.onwheel =
+          st.onclick =
+            null;
+        st.innerHTML = "";
+        st.style.background = BG[((cur - 1) / 10) | 0];
+        const l = L[cur - 1];
+        $("#ins").textContent = f(l.i);
+        hud();
+        say(
+          cur < 15
+            ? pick([
+                "Good luck! Take your time.",
+                "Nice and easy. You got this!",
+              ])
+            : pick([
+                "Too easy… or is it?",
+                "Are you sure about that?",
+                "Think differently!",
+                "I didn’t put a trap here. Probably.",
+              ]),
+        );
+        l.s();
+        if (SC[cur]) st.insertAdjacentHTML("afterbegin", scn(SC[cur]));
+        if (cur > 10 && cur % 5 != 4 && Math.random() < 0.3) ad();
+        loc();
+      }
+      function renderProf() {
+        $("#pav").textContent = S.av;
+        const p = $("#pn");
+        p.value = S.name;
+        p.placeholder = tr("Your name");
+        p.oninput = () => {
+          S.name = p.value.slice(0, 14);
+          save();
+        };
+        $("#avs").innerHTML = ["👾", "😈", "🐱", "🦊", "🐸", "🦄", "🤖", "👻"]
+          .map(
+            (a) =>
+              `<button class="${a == S.av ? "sel" : ""}" data-a="av" data-v="${a}">${a}</button>`,
+          )
+          .join("");
+        $("#pst").innerHTML = [
+          ["🪙 Coins", S.c],
+          ["⭐ Score", S.sc],
+          ["✅ Levels solved", Object.keys(S.d).length + "/" + MAX_LEVELS],
+          ["💡 Hints", S.h],
+        ]
+          .map(
+            (r) =>
+              `<div class="item"><span>${r[0]}</span><b style="margin-left:auto">${r[1]}</b></div>`,
+          )
+          .join("");
+      }
+      function runAway(b) {
+        b.classList.remove("tired");
+        b.classList.add("legs");
+        b.dataset.run = 1;
+        const m = $("#menu").getBoundingClientRect(),
+          w = b.getBoundingClientRect();
+        let x = 0,
+          y = 0,
+          tx = 0,
+          ty = 0,
+          last = performance.now();
+        const end = last + 2800,
+          np = () => {
+            tx = (Math.random() - 0.5) * (m.width - w.width - 30);
+            ty = (Math.random() - 0.5) * m.height * 0.5;
+          };
+        np();
+        const lp = (t) => {
+          const d = Math.min(0.05, (t - last) / 1000);
+          last = t;
+          const dx = tx - x,
+            dy = ty - y,
+            dl = Math.hypot(dx, dy);
+          if (dl < 25) np();
+          else {
+            x += (dx / dl) * 340 * d;
+            y += (dy / dl) * 340 * d;
+          }
+          b.style.translate = `${x}px ${y - Math.abs(Math.sin(t / 90)) * 10}px`;
+          b.style.rotate = Math.sin(t / 70) * 5 + "deg";
+          if (t < end) requestAnimationFrame(lp);
+          else {
+            delete b.dataset.run;
+            b.style.rotate = "";
+            b.classList.add("tired");
+            toast("Huff… huff… I’m tired…");
+          }
+        };
+        requestAnimationFrame(lp);
+      }
+      function ad() {
+        const d = document.createElement("div");
+        d.style.cssText =
+          "position:absolute;inset:12%;z-index:30;background:#fff;border:4px solid #2b1b54;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqmin;font-weight:800;text-align:center;font-size:5cqmin;padding:3cqmin";
+        d.innerHTML =
+          "<div>" +
+          (ID()
+            ? "🎁 SELAMAT! Kamu pemenang ke-1.000.000!"
+            : "🎁 CONGRATS! You are visitor #1,000,000!") +
+          '</div><button class="b gr" style="font-size:5cqmin">' +
+          (ID() ? "KLAIM SEKARANG" : "CLAIM NOW") +
+          '</button><span id="adx" style="position:absolute;right:8px;top:4px;font-size:3.5cqmin;cursor:pointer;opacity:.5;padding:1cqmin">✕</span>';
+        d.onpointerdown = (e) => e.stopPropagation();
+        d.onclick = (e) => {
+          if (e.target.id == "adx") {
+            d.remove();
+            say("Aw, you closed my ad!");
+          } else {
+            say("Haha! That’s a fake ad!", "laugh");
+            const x = d.querySelector("#adx");
+            x.style.right = "auto";
+            x.style.left = Math.random() * 88 + "%";
+            x.style.top = Math.random() * 85 + "%";
+          }
+        };
+        st.append(d);
+      }
+      function over() {
+        const n = S.go || 0;
+        const m = `<div class="mascot">${mon("laugh")}</div><h2>Out of lives!</h2>`;
+        if (n == 0)
+          return modal(
+            m +
+              `<p>Follow the developer on Instagram and get 5 free lives!</p><a class="b pk wide" href="https://www.instagram.com/_atenntxs/" target="_blank" rel="noopener" data-a="igdone" style="text-decoration:none;text-align:center">📸 Follow @_atenntxs</a><button class="b or wide" data-go="menu">Menu</button>`,
+          );
+        if (n == 1)
+          return modal(
+            m +
+              `<p>Top up lives now! 💎 Special offer today only!</p><div class="item" style="width:100%"><span>❤️ ×10</span><b style="margin-left:auto">Rp 15.000</b></div><button class="b pk wide" data-a="topup">💳 TOP UP</button><button class="b or wide" data-go="menu">Menu</button>`,
+          );
+        S.nx = new Date(new Date().setHours(24, 0, 0, 0)).getTime();
+        save();
+        blocked();
+      }
+      function blocked() {
+        modal(
+          `<div class="mascot">${mon("laugh")}</div><h2>No lives left!</h2><p>Come back tomorrow and you’ll get 5 lives. See you!</p><b id="cd" style="font-size:1.6rem"></b><button class="b or wide" data-go="menu">Menu</button>`,
+        );
+        const u = () => {
+          const e = $("#cd");
+          if (!e || Date.now() >= S.nx) return clearInterval(iv);
+          const s = Math.floor((S.nx - Date.now()) / 1000);
+          e.textContent = [(s / 3600) | 0, ((s / 60) % 60) | 0, s % 60]
+            .map((v) => String(v).padStart(2, "0"))
+            .join(":");
+        };
+        const iv = setInterval(u, 1000);
+        u();
+      }
+      function confetti() {
+        for (let i = 0; i < 50; i++) {
+          const d = document.createElement("i");
+          d.className = "cf";
+          d.style.cssText = `left:${Math.random() * 100}vw;background:${["#ff7eb6", "#ffd93d", "#7c4dff", "#35d6ed", "#ff9248"][i % 5]};animation-delay:${Math.random() * 0.4}s;rotate:${Math.random() * 360}deg`;
+          document.body.append(d);
+          setTimeout(() => d.remove(), 2400);
+        }
+      }
+      function lose(m) {
+        if (locked) return;
+        if (cur >= 20 && Math.random() < 0.2) {
+          locked = 1;
+          sOk();
+          confetti();
+          say(tt("BENAR! \ud83c\udf89", "CORRECT! \ud83c\udf89"), "shock");
+          later(() => {
+            locked = 0;
+            lose0(m);
+          }, 1100);
+          return;
+        }
+        lose0(m);
+      }
+      function lose0(m) {
+        if (locked) return;
+        locked = 1;
+        mist++;
+        lives--;
+        sBad();
+        $("#app").classList.add("shake");
+        setTimeout(() => $("#app").classList.remove("shake"), 400);
+        say(
+          cur < 15
+            ? m && !/HAHA|Nope/.test(m)
+              ? m
+              : pick(["Oops, not quite. Try again!", "Almost! You can do it!"])
+            : mist > 2
+              ? pick([
+                  "Seriously?! Again?!",
+                  "Is your finger okay?",
+                  "Maybe try with your eyes open?",
+                ])
+              : m || pick(["HAHA! WRONG!", "Nope! Try thinking differently!"]),
+          "laugh",
+        );
+        trollTaunt();
+        hud();
+        if (lives <= 0) {
+          S.dead = 1;
+          save();
+          later(over, 1000);
+        } else later(run, 1300);
+      }
+      function win(m) {
+        if (locked) return;
+        locked = 1;
+        sOk();
+        if (cur >= 40 && Math.random() < 0.4) {
+          say("HAHA! WRONG!", "laugh");
+          later(() => say("Just kidding! You won!", "shock"), 900);
+        } else say(m || "You actually solved it?!", "shock");
+        confetti();
+        const secs = (Date.now() - t0) / 1000,
+          pts = Math.max(
+            50,
+            100 +
+              Math.max(0, 50 - Math.round(secs) * 2) +
+              (mist ? 0 : 50) -
+              hu * 20,
+          );
+        S.sc += pts;
+        S.c += 10;
+        if (!S.d[cur] && cur % 2 == 0) S.h++;
+        S.d[cur] = 1;
+        if (cur >= S.u && cur < MAX_LEVELS) S.u = cur + 1;
+        if (!mist && !hu) S.fl = 1;
+        let bonus = "";
+        if (dly && S.day != new Date().toDateString()) {
+          S.day = new Date().toDateString();
+          S.c += 50;
+          S.dy = 1;
+          bonus = "<p>📅 Daily bonus: +50 coins!</p>";
+        }
+        lives = lives >= 3 ? lives : lives + 1;
+        ach();
+        save();
+        hud();
+        later(
+          () =>
+            modal(
+              `<div class="mascot">${mon("shock")}</div><h2>${"⭐".repeat(mist ? 2 : 3)}</h2><h2>${cur == MAX_LEVELS ? "You escaped?!" : "Level solved!"}</h2><p>+${pts} ${tr("points")} · +10 ${tr("coins")}</p>${bonus}${cur < MAX_LEVELS && !dly ? '<button class="b pk wide" data-a="next">Next level ▶</button>' : ""}<button class="b cy wide" data-a="again">Replay</button><button class="b or wide" data-go="menu">Menu</button>`,
+            ),
+          cur >= 40 ? 1900 : 1100,
+        );
+      }
+      const AL = [
+        [
+          "first",
+          "🐣",
+          "First Win",
+          "Solve any level",
+          () => Object.keys(S.d).length >= 1,
+        ],
+        [
+          "five",
+          "🔥",
+          "Five Down",
+          "Solve 5 levels",
+          () => Object.keys(S.d).length >= 5,
+        ],
+        [
+          "all",
+          "👑",
+          "Brain Master",
+          "Solve all levels",
+          () => Object.keys(S.d).length >= MAX_LEVELS,
+        ],
+        ["fl", "🎯", "Flawless", "Win with no mistakes or hints", () => S.fl],
+        ["coin", "💰", "Pocket Full", "Collect 100 coins", () => S.c >= 100],
+        ["dy", "📅", "Daily Brain", "Finish a daily challenge", () => S.dy],
+      ];
+      function ach() {
+        AL.forEach((a) => {
+          if (!S.a[a[0]] && a[4]()) {
+            S.a[a[0]] = 1;
+            toast("🏆 " + tr(a[2]) + " " + tr("unlocked!"));
+          }
+        });
+      }
+
+      const o = (h, x, y, s, id = "", c = "") =>
+        `<div class="o ${c}" ${id ? `id="${id}"` : ""} style="left:${x}%;top:${y}%;${s ? `font-size:${s}cqmin` : ""}">${h}</div>`;
+      function drag(el, f = {}) {
+        let sx,
+          sy,
+          ox = 0,
+          oy = 0,
+          on = 0,
+          mv = 0,
+          lx,
+          ly;
+        el.style.touchAction = "none";
+        el.style.cursor = "grab";
+        el.onpointerdown = (e) => {
+          if (locked) return;
+          e.stopPropagation();
+          on = 1;
+          mv = 0;
+          sx = lx = e.clientX;
+          sy = ly = e.clientY;
+          el.setPointerCapture(e.pointerId);
+          el.style.zIndex = 9;
+        };
+        el.onpointermove = (e) => {
+          if (!on) return;
+          const dx = e.clientX - sx,
+            dy = e.clientY - sy;
+          if (Math.abs(dx) + Math.abs(dy) > 8) mv = 1;
+          el.style.translate = `${ox + dx}px ${oy + dy}px`;
+          const s = Math.hypot(e.clientX - lx, e.clientY - ly);
+          lx = e.clientX;
+          ly = e.clientY;
+          f.move && f.move(el, s, ox + dx, oy + dy);
+        };
+        el.onpointerup = (e) => {
+          if (!on) return;
+          on = 0;
+          ox += e.clientX - sx;
+          oy += e.clientY - sy;
+          f.end && f.end(el, mv);
+        };
+      }
+      function near(a, b) {
+        const A = a.getBoundingClientRect(),
+          B = b.getBoundingClientRect();
+        return (
+          Math.hypot(
+            A.x + A.width / 2 - B.x - B.width / 2,
+            A.y + A.height / 2 - B.y - B.height / 2,
+          ) <
+          Math.max(B.width, B.height) * 0.7
+        );
+      }
+      function rot() {
+        if (cur != 8 || locked || rotd) return;
+        rotd = 1;
+        $("#rt").style.transform = "rotate(180deg)";
+        say("Wait… everything is upside down!", "shock");
+        later(() => win("Gravity is just a suggestion!"), 1000);
+      }
+
+      const L = [
+        {
+          t: "Hands off",
+          g: "Easy",
+          i: "Don’t touch the red button.",
+          h: "Read the instruction again. Do you really have to obey it?",
+          s() {
+            st.innerHTML =
+              o('<button class="b rd big" id="r">RED</button>', 50, 32) +
+              o('<button class="b gr" id="ok">Totally safe ✓</button>', 50, 70);
+            $("#r").onclick = () => win("You touched it?! Rude… and correct!");
+            $("#ok").onclick = () => lose("Safe? Nothing is safe here!");
+          },
+        },
+        {
+          t: "Biggest thing",
+          g: "Easy",
+          i: "Tap the biggest object.",
+          h: "Size depends on how close you look. Zoom in with +, pinch or scroll.",
+          s() {
+            let z = 1;
+            const set = (v) => {
+              z = Math.max(1, Math.min(6, v));
+              $("#z").style.transform = `scale(${z})`;
+            };
+            st.innerHTML =
+              '<div id="z" style="position:absolute;inset:0;transform-origin:72% 74%;transition:transform .2s">' +
+              o("🏠", 22, 30, 34, "", "j") +
+              o("🌳", 72, 26, 30, "", "j") +
+              o("🐘", 32, 72, 28, "", "j") +
+              o("🐜", 72, 74, 2.2, "tiny") +
+              '</div><div class="zc"><button class="b" id="zm">−</button><button class="b" id="zp">+</button></div>';
+            $("#zp").onclick = () => set(z + 1);
+            $("#zm").onclick = () => set(z - 1);
+            $$(".j").forEach(
+              (e) => (e.onclick = () => lose("That’s only big from far away!")),
+            );
+            $("#tiny").onclick = () =>
+              z >= 3
+                ? win("Up close, the ant is a giant!")
+                : say("Hmm, it’s so tiny… look closer!");
+            const P = {},
+              dist = () => {
+                const [a, b] = Object.values(P);
+                return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+              };
+            let d0 = 0,
+              z0 = 1;
+            st.onwheel = (e) => {
+              e.preventDefault();
+              set(z - Math.sign(e.deltaY));
+            };
+            st.onpointerdown = (e) => {
+              P[e.pointerId] = e;
+              if (Object.keys(P).length == 2) {
+                d0 = dist();
+                z0 = z;
+              }
+            };
+            st.onpointermove = (e) => {
+              if (P[e.pointerId]) {
+                P[e.pointerId] = e;
+                if (Object.keys(P).length == 2 && d0) set((z0 * dist()) / d0);
+              }
+            };
+            st.onpointerup = st.onpointercancel = (e) => {
+              delete P[e.pointerId];
+              d0 = 0;
+            };
+          },
+        },
+        {
+          t: "Make it rain",
+          g: "Easy",
+          i: "The sky is sunny. Make it rain!",
+          h: "Clouds hold water. Drag the cloud around hard, or tap it again and again.",
+          s() {
+            let en = 0,
+              rn = 0;
+            st.innerHTML =
+              o("☀️", 76, 18, 26, "sun") +
+              '<div id="dr"></div>' +
+              o("☁️", 28, 26, 36, "cl");
+            const add = (n) => {
+              if (rn || locked) return;
+              en += n;
+              if (en > 450) say("Something’s grumbling up there…");
+              if (en > 1000) {
+                rn = 1;
+                $("#sun").textContent = "🌥️";
+                $("#dr").className = "rain";
+                win("It’s raining! Cloud power!");
+              }
+            };
+            drag($("#cl"), {
+              move: (e, s) => add(s),
+              end: (e, mv) => {
+                if (!mv) add(200);
+              },
+            });
+            window.ondevicemotion = (e) => {
+              const a = e.accelerationIncludingGravity;
+              if (a && Math.hypot(a.x || 0, a.y || 0, a.z || 0) > 25) add(150);
+            };
+          },
+        },
+        {
+          t: "Easy math",
+          g: "Medium",
+          i: "What is 2 + 2 ?",
+          h: "Is every option a number?",
+          s() {
+            st.innerHTML =
+              '<div class="q">What is 2 + 2 ?</div><div class="g4">' +
+              ["3", "4", "5", "FOUR"]
+                .map(
+                  (x) =>
+                    `<button class="b ${x == "FOUR" ? "pk" : "sk"}" data-x="${x}">${x}</button>`,
+                )
+                .join("") +
+              "</div>";
+            $$(".g4 .b").forEach(
+              (b) =>
+                (b.onclick = () =>
+                  b.dataset.x == "FOUR"
+                    ? win("FOUR… is the word! Sneaky!")
+                    : lose(
+                        b.dataset.x == "4"
+                          ? "Correct… but too obvious! Read again!"
+                          : "HAHA! Even I know that’s wrong!",
+                      )),
+            );
+          },
+        },
+        {
+          t: "Locked door",
+          g: "Medium",
+          i: "Open the door.",
+          h: "Doors can be moved too. Try dragging the door itself.",
+          s() {
+            st.innerHTML =
+              doorHTML("door", 50, 44, 36, 56) +
+              o("\ud83d\udd11", 20, 86, 13, "key");
+            const p = $("#doorp");
+            let sx = 0,
+              sy = 0,
+              on = 0,
+              ang = 0;
+            p.style.touchAction = "none";
+            p.style.cursor = "grab";
+            p.onpointerdown = (e) => {
+              if (locked) return;
+              on = 1;
+              sx = e.clientX;
+              sy = e.clientY;
+              p.setPointerCapture(e.pointerId);
+              p.style.transition = "none";
+            };
+            p.onpointermove = (e) => {
+              if (!on) return;
+              ang = Math.min(
+                100,
+                Math.hypot(e.clientX - sx, e.clientY - sy) * 0.6,
+              );
+              p.style.transform = `rotateY(${-ang}deg)`;
+            };
+            p.onpointerup = () => {
+              if (!on) return;
+              on = 0;
+              if (ang > 30) {
+                openDoor("door");
+                win("It was never locked!");
+              } else {
+                p.style.transition = "transform .5s";
+                p.style.transform = "rotateY(0)";
+                say("It budged a little\u2026 pull harder!");
+              }
+            };
+            drag($("#key"), {
+              end: (k) => {
+                if (near(k, $("#door"))) lose("The key doesn\u2019t even fit!");
+              },
+            });
+          },
+        },
+        {
+          t: "Star thief",
+          g: "Medium",
+          i: "Don’t let the monster win!",
+          h: "The monster only wants the star. Take it far away: off the edge of the screen!",
+          s() {
+            st.innerHTML =
+              o("⭐", 50, 50, 16, "star") + o("👾", 10, 12, 16, "mon");
+            const m = $("#mon"),
+              sr = $("#star");
+            let R = st.getBoundingClientRect(),
+              mx = R.width * 0.1,
+              my = R.height * 0.12,
+              last = performance.now(),
+              id;
+            const sp = Math.hypot(R.width, R.height) / 8;
+            drag(sr, {
+              end: () => {
+                const a = sr.getBoundingClientRect(),
+                  r = st.getBoundingClientRect(),
+                  cx = a.x + a.width / 2 - r.x,
+                  cy = a.y + a.height / 2 - r.y,
+                  g = a.width * 0.6;
+                if (cx < g || cy < g || cx > r.width - g || cy > r.height - g)
+                  win("The star escaped!");
+              },
+            });
+            const lp = (t) => {
+              if (locked) return;
+              const d = (t - last) / 1000;
+              last = t;
+              const a = sr.getBoundingClientRect(),
+                r = st.getBoundingClientRect(),
+                dx = a.x + a.width / 2 - r.x - mx,
+                dy = a.y + a.height / 2 - r.y - my,
+                dl = Math.hypot(dx, dy) || 1;
+              if (dl < a.width * 0.5) {
+                lose("The monster stole the star!");
+                return;
+              }
+              mx += (dx / dl) * sp * d;
+              my += (dy / dl) * sp * d;
+              m.style.left = mx + "px";
+              m.style.top = my + "px";
+              id = requestAnimationFrame(lp);
+            };
+            id = requestAnimationFrame(lp);
+            clean.push(() => cancelAnimationFrame(id));
+          },
+        },
+        {
+          t: "Wait!",
+          g: "Hard",
+          i: "Don’t do anything.",
+          h: "Seriously. Don’t touch, tap or press anything for a few seconds.",
+          s() {
+            st.innerHTML = o("🧘", 50, 46, 40) + o("(shh…)", 50, 78, 8);
+            st.onpointerdown = () =>
+              lose("You tapped! That’s doing something!");
+            later(() => say("Psst… one little tap won’t hurt…"), 1500);
+            later(() => say("…still waiting…"), 3000);
+            later(() => say("Psst! Tap it. I dare you!"), 4200);
+            later(() => win("Doing nothing: expert level!"), 5200);
+          },
+        },
+        {
+          t: "Flip it",
+          g: "Hard",
+          i: "Nothing here will budge. Flip the situation!",
+          h: "Use the rotate button (or press R, or turn your phone upside down).",
+          s() {
+            st.innerHTML =
+              '<div class="fill" id="rt" style="background:linear-gradient(#bfe9ff,#ffe9f4)">' +
+              o("🗿", 28, 76, 22, "", "j") +
+              o("🧱", 62, 80, 18, "", "j") +
+              o("🪨", 82, 66, 14, "", "j") +
+              o("🐢", 50, 24, 14, "", "j") +
+              '</div><div class="zc"><button class="b or" data-a="rot">🔄 Rotate</button></div>';
+            $$(".j").forEach(
+              (e) =>
+                (e.onclick = () => {
+                  say("Too heavy! It won’t move.");
+                  e.classList.add("wob");
+                  setTimeout(() => e.classList.remove("wob"), 400);
+                }),
+            );
+            krot = rot;
+            window.ondeviceorientation = (e) => {
+              if (Math.abs(e.beta) > 150) rot();
+            };
+          },
+        },
+        {
+          t: "Invisible cat",
+          g: "Impossible",
+          i: "Find the invisible cat.",
+          h: "Something is sparkling near the floor…",
+          s() {
+            st.innerHTML =
+              '<div class="fill" id="rm" style="background:linear-gradient(#ffe3b3 62%,#d9a066 62%)">' +
+              o("🪟", 22, 24, 26, "", "k") +
+              o("💡", 80, 28, 16, "", "k") +
+              o("🪴", 85, 74, 22, "", "k") +
+              '<div class="o rug" id="rug" style="left:42%;top:82%"><span class="sp">✨</span></div></div>';
+            $$(".k").forEach(
+              (e) =>
+                (e.onclick = (ev) => {
+                  ev.stopPropagation();
+                  lose("Nothing in there but dust!");
+                }),
+            );
+            $("#rm").onclick = () => say("Just an empty room…");
+            $("#rug").onclick = (e) => {
+              e.stopPropagation();
+              $("#rug").insertAdjacentHTML(
+                "beforeend",
+                '<span class="cat">🐈</span>',
+              );
+              win("Found the cat! It was camouflaged!");
+            };
+          },
+        },
+        {
+          t: "Escape the quiz",
+          g: "Impossible",
+          i: "Escape! Use the EXIT.",
+          h: "That EXIT button looks fake. Where is a real way out?",
+          s() {
+            st.innerHTML =
+              doorHTML("dr", 84, 40, 22, 36) +
+              o('<div class="sign">EXIT</div>', 84, 12, 0) +
+              o('<button class="b rd">EXIT</button>', 36, 62, 0, "ex");
+            drag($("#ex"), {
+              end: (e, mv) => {
+                if (!mv) lose("That EXIT is totally fake!");
+                else if (near(e, $("#dr"))) {
+                  openDoor("dr");
+                  win("You escaped\u2026 the quiz?!");
+                }
+              },
+            });
+          },
+        },
+      ];
+      const MAX_LEVELS = L.length;
+      const ID = () => S.lang == "id",
+        PR = [
+          ["🍎", "🍅"],
+          ["😀", "😃"],
+          ["🐶", "🐕"],
+          ["🌕", "🌝"],
+          ["🕐", "🕑"],
+          ["🔵", "🟦"],
+        ];
+      const RD = [
+        [
+          "Apa yang naik tapi tidak pernah turun?",
+          "Umur",
+          "Balon",
+          "Lift",
+          "Tangga",
+        ],
+        [
+          "Benda apa yang makin diisi makin ringan?",
+          "Balon",
+          "Karung",
+          "Ember",
+          "Dompet",
+        ],
+        [
+          "Apa yang punya kepala dan ekor tapi tak punya badan?",
+          "Koin",
+          "Ular",
+          "Kecebong",
+          "Paku",
+        ],
+        [
+          "Apa yang basah saat dipakai mengeringkan?",
+          "Handuk",
+          "Matahari",
+          "Kipas",
+          "Sapu",
+        ],
+        [
+          "Kursi apa yang tak boleh diduduki?",
+          "Kursi listrik",
+          "Kursi roda",
+          "Kursi malas",
+          "Kursi taman",
+        ],
+        [
+          "Buah apa yang suka ngomong?",
+          "Buah bibir",
+          "Durian",
+          "Apel",
+          "Salak",
+        ],
+        [
+          "Pintu apa yang tak punya engsel?",
+          "Pintu air",
+          "Pintu kamar",
+          "Pintu mobil",
+          "Pintu pagar",
+        ],
+        [
+          "Mata apa yang tak bisa melihat?",
+          "Mata pisau",
+          "Mata kucing",
+          "Mata elang",
+          "Mata manusia",
+        ],
+        [
+          "Apa yang punya banyak gigi tapi tak bisa menggigit?",
+          "Sisir",
+          "Singa",
+          "Buaya",
+          "Hiu",
+        ],
+        [
+          "Apa yang punya leher tapi tak punya kepala?",
+          "Botol",
+          "Jerapah",
+          "Baju",
+          "Kucing",
+        ],
+        [
+          "Apa yang punya mata tapi tak bisa melihat?",
+          "Jarum",
+          "Kucing",
+          "Burung",
+          "Ikan",
+        ],
+        [
+          "Apa yang punya tangan tapi tak bisa bertepuk tangan?",
+          "Jam",
+          "Kera",
+          "Gorila",
+          "Bayi",
+        ],
+        [
+          "Apa yang selalu datang tapi tak pernah tiba?",
+          "Besok",
+          "Kemarin",
+          "Hari ini",
+          "Kurir",
+        ],
+        [
+          "Apa yang berlari tapi tak punya kaki?",
+          "Air",
+          "Kuda",
+          "Cheetah",
+          "Anjing",
+        ],
+        [
+          "Apa yang punya kunci tapi tak bisa membuka pintu?",
+          "Piano",
+          "Gembok",
+          "Rumah",
+          "Motor",
+        ],
+        [
+          "Apa yang makin diambil makin besar?",
+          "Lubang",
+          "Uang",
+          "Nasi",
+          "Kue",
+        ],
+        [
+          "Apa yang punya empat kaki tapi tak bisa berjalan?",
+          "Meja",
+          "Kucing",
+          "Anjing",
+          "Sapi",
+        ],
+        [
+          "Apa yang basah di atas tapi kering di bawah?",
+          "Payung",
+          "Handuk",
+          "Sungai",
+          "Kolam",
+        ],
+        [
+          "Apa yang bisa kamu tangkap tapi tak bisa dilempar?",
+          "Flu",
+          "Bola",
+          "Ikan",
+          "Kupu-kupu",
+        ],
+        [
+          "Apa yang punya lubang tapi bisa menahan air?",
+          "Spons",
+          "Saringan",
+          "Jaring",
+          "Keranjang",
+        ],
+        [
+          "Kenapa ayam menyeberang jalan?",
+          "Ingin ke seberang",
+          "Mau berenang",
+          "Cari jagung",
+          "Diajak teman",
+        ],
+        [
+          "Hewan apa yang bisa terbang tapi bukan burung?",
+          "Kelelawar",
+          "Kucing",
+          "Ular",
+          "Sapi",
+        ],
+        [
+          "Apa yang selalu ada di depan tapi tak terlihat?",
+          "Masa depan",
+          "Hidung",
+          "Mata",
+          "Kaca",
+        ],
+        [
+          "Apa yang bisa dipecahkan tapi tak pernah jatuh?",
+          "Rekor",
+          "Gelas",
+          "Piring",
+          "Telur",
+        ],
+        [
+          "Apa yang makin dipakai makin kecil?",
+          "Sabun",
+          "Gunung",
+          "Pohon",
+          "Batu",
+        ],
+        [
+          "Apa yang jatuh tapi tak pernah terluka?",
+          "Hujan",
+          "Kucing",
+          "Anak",
+          "Pesawat",
+        ],
+        [
+          "Apa yang bisa kamu pecahkan tanpa menyentuhnya?",
+          "Keheningan",
+          "Kaca",
+          "Piring",
+          "Batu",
+        ],
+        [
+          "Apa yang makin sore makin panjang?",
+          "Bayangan",
+          "Rambut",
+          "Kuku",
+          "Jalan",
+        ],
+        ["Ikan apa yang bisa terbang?", "Ikan terbang", "Paus", "Lele", "Hiu"],
+        [
+          "Apa yang makin tinggi makin dingin?",
+          "Gunung",
+          "Panci",
+          "Kompor",
+          "Matahari",
+        ],
+        ["Planet apa yang dihuni manusia?", "Bumi", "Mars", "Venus", "Pluto"],
+        [
+          "Apa yang tetap kamu simpan setelah kamu berikan?",
+          "Janji",
+          "Uang",
+          "Hadiah",
+          "Bunga",
+        ],
+        [
+          "Apa yang selalu kamu bawa tapi tak pernah berat?",
+          "Nama",
+          "Tas",
+          "Buku",
+          "Sepatu",
+        ],
+        [
+          "Apa yang bertambah kalau dibagi?",
+          "Kebahagiaan",
+          "Uang",
+          "Kue",
+          "Pizza",
+        ],
+      ];
+      function gen(i) {
+        const g =
+            i <= 20
+              ? "Easy"
+              : i <= 50
+                ? "Medium"
+                : i <= 85
+                  ? "Hard"
+                  : "Impossible",
+          m = i % 5,
+          Z = (t, n, h, s) => ({ t, g, i: n, h, s });
+        if (m == 1 || m == 3) {
+          const r = RD[(Math.floor(i / 5) * 2 + (m == 3)) % RD.length],
+            a = r[1];
+          return Z(
+            "Riddle",
+            "Riddle time! Pick the answer.",
+            () =>
+              ID()
+                ? `Jawabannya diawali huruf “${a[0]}”.`
+                : `The answer starts with “${a[0]}”.`,
+            () => {
+              const ops = r.slice(1).sort(() => Math.random() - 0.5);
+              st.innerHTML =
+                `<div class="qq" style="${i >= 70 ? "rotate:180deg" : ""}">${r[0]}</div><div class="opts">` +
+                ops
+                  .map(
+                    (x, k) =>
+                      `<button class="b ${["pk", "cy", "or", "sk"][k]}">${x}</button>`,
+                  )
+                  .join("") +
+                "</div>";
+              let sure = 0;
+              $$(".opts .b").forEach(
+                (b) =>
+                  (b.onclick = () => {
+                    if (b.textContent.replace("?", "") != a)
+                      return lose(
+                        pick([
+                          "HAHA! WRONG!",
+                          "Nope! Try thinking differently!",
+                        ]),
+                      );
+                    if (i >= 25 && !sure) {
+                      sure = 1;
+                      say("Are you SURE? Really sure?", "laugh");
+                      b.textContent = a + "?";
+                      later(() => {
+                        sure = 0;
+                        b.textContent = a;
+                      }, 2500);
+                      return;
+                    }
+                    win();
+                  }),
+              );
+            },
+          );
+        }
+        if (m == 2) {
+          const n = Math.min(3 + ((i / 12) | 0), 9),
+            p = PR[((i / 17) | 0) % PR.length];
+          return Z(
+            "Odd one out",
+            "Tap the one that looks different.",
+            "Look for the tiny difference.",
+            () => {
+              const x = (Math.random() * n * n) | 0;
+              st.innerHTML =
+                `<div class="eg" style="grid-template-columns:repeat(${n},1fr);--f:${58 / n}cqmin">` +
+                Array.from(
+                  { length: n * n },
+                  (_, k) =>
+                    `<span data-k="${k}">${k == x ? p[1] : p[0]}</span>`,
+                ).join("") +
+                "</div>";
+              $$(".eg span").forEach(
+                (e) =>
+                  (e.onclick = () =>
+                    +e.dataset.k == x
+                      ? win()
+                      : lose("That one is identical to the others!")),
+              );
+            },
+          );
+        }
+        if (m == 0) {
+          const mul = i > 60,
+            a = mul ? 2 + (i % 9) : 2 + (i % 9) + ((i / 10) | 0),
+            b = mul
+              ? 2 + (i % 8) + ((i / 30) | 0)
+              : 3 + (i % 7) + ((i / 20) | 0),
+            sum = mul ? a * b : a + b,
+            rev = i >= 40 && (i / 5) % 2 == 0;
+          return Z(
+            "Math trap",
+            rev ? "Pick a WRONG answer!" : "Solve it. Read carefully!",
+            rev
+              ? "Any answer except the correct one wins."
+              : "Double-check the question.",
+            () => {
+              const ops = [sum, sum + 1, sum - 1, sum + 10].sort(
+                () => Math.random() - 0.5,
+              );
+              st.innerHTML =
+                `<div class="q">${a} ${mul ? "×" : "+"} ${b} = ?</div><div class="g4">` +
+                ops
+                  .map(
+                    (x, k) =>
+                      `<button class="b ${["pk", "cy", "or", "sk"][k]}">${x}</button>`,
+                  )
+                  .join("") +
+                "</div>";
+              $$(".g4 .b").forEach(
+                (bt) =>
+                  (bt.onclick = () =>
+                    (+bt.textContent == sum) != rev
+                      ? win()
+                      : lose("HAHA! WRONG!")),
+              );
+            },
+          );
+        }
+        const v = ((i / 5) | 0) % 4;
+        if (v == 0) {
+          const n = Math.min(5 + ((i / 5) | 0), 30),
+            sec = Math.ceil(n / 3.2) + 1;
+          return Z(
+            "Tap storm",
+            () =>
+              ID()
+                ? `Ketuk tombol ${n} kali dalam ${sec} detik!`
+                : `Tap the button ${n} times in ${sec} seconds!`,
+            "Tap fast, tap often!",
+            () => {
+              let c = 0;
+              st.innerHTML = o(
+                `<button class="b pk" id="tb">0/${n}</button>`,
+                50,
+                50,
+                0,
+              );
+              const b = $("#tb");
+              b.onclick = () => {
+                if (locked) return;
+                if (!c)
+                  later(() => {
+                    if (!locked) lose("Too slow!");
+                  }, sec * 1000);
+                c++;
+                b.textContent = c + "/" + n;
+                if (i > 30) {
+                  b.style.scale = Math.max(0.5, 1 - c * 0.03);
+                  const e = b.parentNode;
+                  e.style.left = 15 + Math.random() * 70 + "%";
+                  e.style.top = 20 + Math.random() * 60 + "%";
+                }
+                if (c >= n) win();
+              };
+            },
+          );
+        }
+        if (v == 1) {
+          const n = 3 + Math.min((i / 8) | 0, 12);
+          return Z(
+            "Stillness",
+            () =>
+              ID()
+                ? `Jangan sentuh apa pun selama ${n} detik.`
+                : `Don’t touch anything for ${n} seconds.`,
+            "Do absolutely nothing.",
+            () => {
+              st.innerHTML = o("🧘", 50, 46, 40);
+              st.onpointerdown = () =>
+                lose("You tapped! That’s doing something!");
+              later(() => say("…still waiting…"), n * 500);
+              later(() => win("Doing nothing: expert level!"), n * 1000 + 200);
+            },
+          );
+        }
+        if (v == 2)
+          return Z(
+            "Do the opposite",
+            "Tap anywhere EXCEPT the button.",
+            "The button is a trap. Where else can you tap?",
+            () => {
+              st.innerHTML = o(
+                '<button class="b rd" id="tb">TAP ME</button>',
+                50,
+                50,
+                0,
+              );
+              $("#tb").onclick = (e) => {
+                e.stopPropagation();
+                lose("You tapped the button!");
+              };
+              st.onclick = () => win();
+            },
+          );
+        return Z(
+          "Drag it",
+          "Drag the gift into the gray box.",
+          "Which box is gray?",
+          () => {
+            const cs = ["#ff7eb6", "#ffd93d", "#bdbdbd"].sort(
+              () => Math.random() - 0.5,
+            );
+            st.innerHTML =
+              o("🎁", 50, 24, 16, "gf") +
+              cs
+                .map(
+                  (c, k) =>
+                    `<div class="o bx" data-c="${c}" style="left:${20 + k * 30}%;top:74%;width:22cqmin;height:22cqmin;background:${c};border:3px solid var(--ink);border-radius:4cqmin"></div>`,
+                )
+                .join("");
+            drag($("#gf"), {
+              end: (gf) => {
+                $$(".bx").forEach((x) => {
+                  if (near(gf, x))
+                    x.dataset.c == "#bdbdbd" ? win() : lose("Wrong box!");
+                });
+              },
+            });
+          },
+        );
+      }
+
+      const tt = (a, b) => (ID() ? a : b),
+        GG = (i) =>
+          i <= 20
+            ? "Easy"
+            : i <= 50
+              ? "Medium"
+              : i <= 85
+                ? "Hard"
+                : "Impossible",
+        T2 = (a, b) => () => (ID() ? a : b),
+        shuf = (a) =>
+          a
+            .map((x) => [Math.random(), x])
+            .sort((p, q) => p[0] - q[0])
+            .map((p) => p[1]),
+        Zf = (i, t, n, hh, s, tl) => ({ t, g: GG(i), i: n, h: hh, s, tl });
+      RD.push(
+        [
+          "Apa yang punya banyak mata tapi tidak bisa melihat?",
+          "Kentang",
+          "Elang",
+          "Lalat",
+          "Cermin",
+        ],
+        [
+          "Apa yang bisa keliling dunia tapi tetap diam di pojok?",
+          "Perangko",
+          "Kompas",
+          "Pesawat",
+          "Globe",
+        ],
+        [
+          "Apa yang punya kaki tapi tak bisa jalan, punya lengan tapi tak bisa memeluk?",
+          "Kursi",
+          "Patung",
+          "Robot",
+          "Boneka",
+        ],
+        [
+          "Kenapa jerapah lehernya panjang?",
+          "Kepalanya jauh dari badan",
+          "Biar bisa tidur berdiri",
+          "Karena sering dijewer",
+          "Supaya kelihatan tinggi",
+        ],
+        [
+          "Nasi apa yang tidak bisa dimakan?",
+          "Nasib",
+          "Nasi kuning",
+          "Nasi uduk",
+          "Nasi goreng",
+        ],
+        [
+          "Kamu punya 3 apel, lalu kamu ambil 2. Berapa apel yang kamu punya?",
+          "2",
+          "1",
+          "3",
+          "5",
+        ],
+        [
+          "Dokter memberi 3 pil, diminum tiap 30 menit. Berapa lama sampai habis?",
+          "1 jam",
+          "1,5 jam",
+          "30 menit",
+          "2 jam",
+        ],
+        [
+          "Ayah Budi punya 5 anak: Nana, Nini, Nunu, Nene, dan…?",
+          "Budi",
+          "Nono",
+          "Nuna",
+          "Nina",
+        ],
+        [
+          "Berapa bulan yang punya 28 hari?",
+          "Semua bulan",
+          "Hanya Februari",
+          "Tidak ada",
+          "Dua",
+        ],
+        [
+          "Mana yang lebih berat: 1 kg kapas atau 1 kg besi?",
+          "Sama saja",
+          "Besi",
+          "Kapas",
+          "Tergantung cuaca",
+        ],
+        [
+          "Apa yang selalu ada di tengah-tengah Jakarta?",
+          "Huruf K",
+          "Monas",
+          "Bundaran HI",
+          "Macet",
+        ],
+        [
+          "Apa yang ada di tengah laut?",
+          "Huruf U",
+          "Ikan",
+          "Kapal",
+          "Gelombang",
+        ],
+        [
+          "Kalau kamu menyalip orang di posisi kedua saat lomba, kamu jadi posisi berapa?",
+          "Kedua",
+          "Pertama",
+          "Ketiga",
+          "Terakhir",
+        ],
+        [
+          "Kalau kamu menyalip orang di posisi terakhir, kamu jadi posisi berapa?",
+          "Mustahil",
+          "Kedua dari belakang",
+          "Terakhir",
+          "Pertama",
+        ],
+        [
+          "Berapa kali kamu bisa mengurangi 5 dari 25?",
+          "Sekali, setelah itu bukan 25 lagi",
+          "5 kali",
+          "4 kali",
+          "20 kali",
+        ],
+        [
+          "Tangga kapal punya 5 anak tangga, jaraknya 30 cm. Air naik 60 cm. Berapa anak tangga yang terendam?",
+          "Tidak ada, kapalnya ikut naik",
+          "2",
+          "3",
+          "5",
+        ],
+        [
+          "Apa yang punya mulut tapi tak bisa makan, punya tepian tapi tak bisa duduk?",
+          "Sungai",
+          "Gua",
+          "Botol",
+          "Sumur",
+        ],
+        [
+          "Apa yang terlihat sekali dalam semenit, dua kali dalam satu momen, tapi tak pernah dalam seribu tahun?",
+          "Huruf M",
+          "Huruf A",
+          "Bulan",
+          "Kedipan",
+        ],
+        [
+          "Seekor ayam jantan bertelur di perbatasan Indonesia-Malaysia. Telurnya milik siapa?",
+          "Tidak ada, ayam jantan tak bertelur",
+          "Indonesia",
+          "Malaysia",
+          "Dibagi dua",
+        ],
+        [
+          "Berapa jumlah huruf pada kata \u201cBERAPA\u201d?",
+          "6",
+          "5",
+          "7",
+          "4",
+        ],
+        [
+          "Apa yang makin banyak kamu ambil, makin banyak yang kamu tinggalkan?",
+          "Langkah",
+          "Uang",
+          "Kue",
+          "Foto",
+        ],
+        [
+          "Apa yang kalau diberi makan hidup, kalau diberi minum mati?",
+          "Api",
+          "Tanaman",
+          "Kucing",
+          "Ikan",
+        ],
+      );
+      const RS = shuf(RD.map((_, k) => k));
+      let rc = 0;
+      const rid = (i) => {
+        const r = RD[RS[rc++ % RS.length]],
+          a = r[1],
+          lg = r[0].length > 60;
+        return Zf(
+          i,
+          T2("Tebak-tebakan", "Riddle"),
+          T2(
+            "Waktunya tebak-tebakan! Pilih jawabannya.",
+            "Riddle time! Pick the answer.",
+          ),
+          T2(
+            `Diawali huruf \u201c${a[0]}\u201d, total ${a.length} karakter.`,
+            `Starts with \u201c${a[0]}\u201d, ${a.length} characters long.`,
+          ),
+          () => {
+            st.innerHTML =
+              `<div class="qq" style="font-size:${lg ? 4.2 : 5.6}cqmin;${i >= 70 ? "rotate:180deg" : ""}">${r[0]}</div><div class="opts" style="top:${lg ? "44%" : "34%"}">` +
+              shuf(r.slice(1))
+                .map(
+                  (x, k) =>
+                    `<button class="b ${["pk", "cy", "or", "sk"][k]}">${x}</button>`,
+                )
+                .join("") +
+              "</div>";
+            let sure = 0;
+            $$(".opts .b").forEach(
+              (b) =>
+                (b.onclick = () => {
+                  if (b.textContent.replace("?", "") != a)
+                    return lose(
+                      pick(["HAHA! WRONG!", "Nope! Try thinking differently!"]),
+                    );
+                  if (i >= 25 && !sure) {
+                    sure = 1;
+                    say("Are you SURE? Really sure?", "laugh");
+                    b.textContent = a + "?";
+                    later(() => {
+                      sure = 0;
+                      b.textContent = a;
+                    }, 2500);
+                    return;
+                  }
+                  win();
+                }),
+            );
+            if (i >= 40) {
+              const sh = setInterval(() => {
+                if (locked || $("#modal").className) return;
+                const o = $(".opts");
+                if (!o) return;
+                shuf([...o.children]).forEach((c) => o.append(c));
+                say(
+                  tt(
+                    "Hehe, kuacak ulang pilihannya! \ud83d\ude1c",
+                    "Hehe, I reshuffled the options! \ud83d\ude1c",
+                  ),
+                  "laugh",
+                );
+              }, 7000);
+              clean.push(() => clearInterval(sh));
+            }
+          },
+          40,
+        );
+      };
+      const old = (i, kind) => {
+        let j =
+          kind == "odd"
+            ? i - (i % 5) + 2
+            : kind == "math"
+              ? i - (i % 5)
+              : Math.floor(i / 20) * 20 +
+                { tap: 0, still: 1, opp: 2, drag: 3 }[kind] * 5 +
+                4;
+        j = Math.max(4, Math.min(100, j));
+        const o = gen(j);
+        o.g = GG(i);
+        return o;
+      };
+      const MK = {
+        seq: (i) => {
+          const k = ((i / 3) | 0) % 6,
+            a = 1 + (i % 5),
+            d = 2 + (i % 4);
+          let s, ans, hn;
+          if (k == 0) {
+            s = [0, 1, 2, 3, 4].map((j) => a + d * j);
+            ans = a + d * 5;
+            hn = T2(
+              "Tambah angka yang sama.",
+              "Add the same number each time.",
+            );
+          } else if (k == 1) {
+            s = [0, 1, 2, 3, 4].map((j) => a * 2 ** j);
+            ans = a * 32;
+            hn = T2("Setiap angka dikali 2.", "Each number doubles.");
+          } else if (k == 2) {
+            const o = i % 3;
+            s = [1, 2, 3, 4, 5].map((j) => (j + o) ** 2);
+            ans = (6 + o) ** 2;
+            hn = T2("Angka kuadrat berurutan.", "Consecutive square numbers.");
+          } else if (k == 3) {
+            s = [a, a + 1, 2 * a + 1, 3 * a + 2, 5 * a + 3];
+            ans = 8 * a + 5;
+            hn = T2(
+              "Jumlahkan dua angka sebelumnya.",
+              "Add the previous two numbers.",
+            );
+          } else if (k == 4) {
+            s = [a, 50, a + d, 50 - d, a + 2 * d];
+            ans = 50 - 2 * d;
+            hn = T2(
+              "Ada dua barisan yang selang-seling.",
+              "Two interleaved sequences.",
+            );
+          } else {
+            s = [1, 2, 4, 7, 11].map((x) => x * a);
+            ans = 16 * a;
+            hn = T2(
+              "Selisihnya naik 1 setiap langkah.",
+              "The gaps grow by one each step.",
+            );
+          }
+          const naive = s[4] + (s[4] - s[3]),
+            ds = [
+              ...new Set([naive, ans + 1, ans - 2, ans + 5, ans * 2, ans + d]),
+            ]
+              .filter((x) => x != ans && x > 0)
+              .slice(0, 3);
+          return Zf(
+            i,
+            T2("Pola angka", "Number pattern"),
+            T2("Angka berikutnya apa?", "What comes next?"),
+            hn,
+            () => {
+              st.innerHTML =
+                `<div class="q" style="top:12%;font-size:8cqmin">${s.join(", ")}, ?</div><div class="g4">` +
+                shuf([ans, ...ds])
+                  .map(
+                    (x, j) =>
+                      `<button class="b ${["pk", "cy", "or", "sk"][j]}">${x}</button>`,
+                  )
+                  .join("") +
+                "</div>";
+              $$(".g4 .b").forEach(
+                (b) =>
+                  (b.onclick = () =>
+                    +b.textContent == ans
+                      ? win(tt("Otakmu encer!", "Big brain!"))
+                      : lose(
+                          tt(
+                            "Salah! Itu jebakan pola biasa 😏",
+                            "Wrong! That’s the obvious-pattern trap 😏",
+                          ),
+                        )),
+              );
+            },
+            35,
+          );
+        },
+        stroop: (i) => {
+          const C = [
+              ["MERAH", "RED", "#e53935"],
+              ["BIRU", "BLUE", "#1e88e5"],
+              ["HIJAU", "GREEN", "#2e9e44"],
+              ["KUNING", "YELLOW", "#f2b800"],
+              ["UNGU", "PURPLE", "#8e24aa"],
+            ],
+            n = 4 + Math.min(4, (i / 25) | 0),
+            nm = (c) => C[c][ID() ? 0 : 1];
+          return Zf(
+            i,
+            T2("Warna tulisan", "Ink colors"),
+            T2(
+              `Ketuk WARNA tintanya, bukan katanya! (${n}x)`,
+              `Tap the INK color, not the word! (${n}x)`,
+            ),
+            T2(
+              "Jangan baca katanya. Lihat warnanya.",
+              "Don’t read the word. Look at the color.",
+            ),
+            () => {
+              let r = 0;
+              const next = () => {
+                const ink = (Math.random() * 5) | 0;
+                let w = (Math.random() * 5) | 0;
+                if (w == ink) w = (w + 1 + ((Math.random() * 4) | 0)) % 5;
+                const ops = shuf([
+                  ink,
+                  ...shuf([0, 1, 2, 3, 4].filter((x) => x != ink)).slice(0, 3),
+                ]);
+                st.innerHTML =
+                  `<div class="q" style="color:${C[ink][2]};font-size:15cqmin;top:10%;-webkit-text-stroke:1.5px #2b1b54;paint-order:stroke fill">${nm(w)}</div><div class="g4" style="top:42%">` +
+                  ops
+                    .map(
+                      (c) =>
+                        `<button class="b sk" data-c="${c}">${nm(c)}</button>`,
+                    )
+                    .join("") +
+                  `</div><div class="q" style="top:84%;font-size:5cqmin">${r}/${n}</div>`;
+                $$(".g4 .b").forEach(
+                  (b) =>
+                    (b.onclick = () => {
+                      if (+b.dataset.c == ink) {
+                        r++;
+                        sTap();
+                        if (r >= n)
+                          return win(tt("Matamu tajam!", "Eagle eyes!"));
+                        say(
+                          tt(
+                            "Lagi! Jangan baca katanya!",
+                            "Again! Don’t read the word!",
+                          ),
+                        );
+                        next();
+                      } else
+                        lose(
+                          tt(
+                            "Kamu baca katanya, kan? \ud83d\ude0f",
+                            "You read the word, didn’t you? \ud83d\ude0f",
+                          ),
+                        );
+                    }),
+                );
+              };
+              next();
+            },
+            30,
+          );
+        },
+        memory: (i) => {
+          const n = 3 + Math.min(5, ((i - 11) / 16) | 0),
+            gap = i > 60 ? 600 : 780;
+          return Zf(
+            i,
+            T2("Ingat urutan", "Remember it"),
+            T2(
+              "Perhatikan urutan kotak yang menyala, lalu ulangi!",
+              "Watch the tiles light up, then repeat the order!",
+            ),
+            T2(
+              "Hafalkan WARNANYA, bukan posisinya.",
+              "Remember the COLORS, not the positions.",
+            ),
+            () => {
+              const cols = ["#ff5f7a", "#ffd93d", "#4ccf6a", "#4a90ff"],
+                seq = Array.from({ length: n }, () => (Math.random() * 4) | 0);
+              st.innerHTML =
+                '<div class="sg">' +
+                cols
+                  .map(
+                    (c, k) =>
+                      `<div class="sq" data-k="${k}" style="background:${c}"></div>`,
+                  )
+                  .join("") +
+                "</div>";
+              const tl = $$(".sq");
+              let ph = 0,
+                pos = 0;
+              const fl = (k) => {
+                tl[k].classList.add("lit");
+                beep(300 + k * 130, 0.25, "sine", 0.1);
+                setTimeout(() => tl[k].classList.remove("lit"), 360);
+              };
+              say(tt("Perhatikan baik-baik…", "Watch closely…"));
+              seq.forEach((k, j) => later(() => fl(k), 900 + j * gap));
+              later(
+                () => {
+                  ph = 1;
+                  if (i >= 50) {
+                    shuf([0, 1, 2, 3]).forEach(
+                      (o, k) => (tl[k].style.order = o),
+                    );
+                    say(
+                      tt(
+                        "Kotaknya kuacak! \ud83d\ude08 Ingat warnanya!",
+                        "I shuffled the tiles! \ud83d\ude08 Remember the colors!",
+                      ),
+                      "laugh",
+                    );
+                  } else say(tt("Giliranmu!", "Your turn!"));
+                },
+                900 + n * gap + 300,
+              );
+              tl.forEach(
+                (t) =>
+                  (t.onclick = () => {
+                    if (!ph || locked) return;
+                    const k = +t.dataset.k;
+                    fl(k);
+                    if (k != seq[pos])
+                      return lose(
+                        tt(
+                          "Salah urutan! Ingatanmu kayak ikan mas \ud83d\udc1f",
+                          "Wrong order! Memory of a goldfish \ud83d\udc1f",
+                        ),
+                      );
+                    if (++pos == n)
+                      win(tt("Ingatan gajah!", "Elephant memory!"));
+                  }),
+              );
+            },
+            40 + n * 3,
+          );
+        },
+        timing: (i) => {
+          const H = 1 + Math.min(3, (i / 28) | 0),
+            w = Math.max(7, 24 - i / 6);
+          return Zf(
+            i,
+            T2("Berhenti!", "Stop it!"),
+            T2(
+              `Ketuk layar saat penanda ada di zona hijau! (${H}x)`,
+              `Tap the screen when the marker is in the green zone! (${H}x)`,
+            ),
+            T2(
+              "Tunggu penandanya lewat, jangan buru-buru.",
+              "Wait for the marker. Don’t rush.",
+            ),
+            () => {
+              let hit = 0,
+                x = 0,
+                dir = 1,
+                zl = 10 + Math.random() * (80 - w),
+                sp = 55 + i * 1.1,
+                id,
+                last = performance.now();
+              st.innerHTML = `<div class="tm"><div class="zn ${i >= 60 ? "blink" : ""}" id="zn" style="left:${zl}%;width:${w}%"></div><div class="mk" id="mk"></div></div><div class="q" id="tq" style="top:62%;font-size:8cqmin">${H}</div>`;
+              const lp = (t) => {
+                if (locked) return;
+                const d = Math.min(0.05, (t - last) / 1000);
+                last = t;
+                x += dir * sp * d;
+                if (x >= 100) {
+                  x = 100;
+                  dir = -1;
+                }
+                if (x <= 0) {
+                  x = 0;
+                  dir = 1;
+                }
+                $("#mk").style.left = x + "%";
+                id = requestAnimationFrame(lp);
+              };
+              id = requestAnimationFrame(lp);
+              clean.push(() => cancelAnimationFrame(id));
+              st.onpointerdown = () => {
+                if (locked) return;
+                if (x >= zl && x <= zl + w) {
+                  hit++;
+                  sOk();
+                  if (hit >= H) return win(tt("Tepat sasaran!", "Bullseye!"));
+                  zl = 10 + Math.random() * (80 - w);
+                  sp *= 1.18;
+                  $("#zn").style.left = zl + "%";
+                  $("#tq").textContent = H - hit;
+                  say(
+                    tt(
+                      "Lagi! Zonanya pindah! \ud83d\ude08",
+                      "Again! The zone moved! \ud83d\ude08",
+                    ),
+                    "laugh",
+                  );
+                } else
+                  lose(
+                    tt(
+                      "Meleset! Terlalu cepat, terlalu lambat, terlalu kamu.",
+                      "Missed! Too early, too late, too you.",
+                    ),
+                  );
+              };
+            },
+            25 + H * 6,
+          );
+        },
+        scramble: (i) => {
+          const W = [
+              ["BUNGA", "Wangi dan ada di taman"],
+              ["KURSI", "Dipakai untuk duduk"],
+              ["PAYUNG", "Pelindung dari hujan"],
+              ["KUCING", "Hewan berkumis suka ikan"],
+              ["SEKOLAH", "Tempat belajar"],
+              ["PELANGI", "Muncul setelah hujan"],
+              ["JERAPAH", "Hewan berleher paling panjang"],
+              ["KOMPUTER", "Dipakai untuk mengetik dan main game"],
+              ["MATAHARI", "Bersinar di siang hari"],
+            ],
+            [w, cl] = W[Math.min(8, Math.max(0, ((i - 11) / 10) | 0))];
+          return Zf(
+            i,
+            T2("Susun kata", "Word scramble"),
+            T2(
+              "Ketuk huruf sesuai urutan untuk membentuk kata.",
+              "Tap the letters in order to spell the word.",
+            ),
+            T2(`Petunjuk: ${cl}`, `Clue: ${cl}`),
+            () => {
+              let pos = 0;
+              st.innerHTML = `<div class="q" style="top:6%;font-size:5cqmin">${cl}</div><div class="q" id="sw" style="top:22%;font-size:8cqmin"></div><div class="lt" id="lt"></div>`;
+              const sw = () => {
+                $("#sw").textContent =
+                  w.slice(0, pos).split("").join(" ") +
+                  " _".repeat(w.length - pos);
+              };
+              shuf(w.split("")).forEach((c) => {
+                const b = document.createElement("button");
+                b.className = "b or";
+                b.textContent = c;
+                b.onclick = () => {
+                  if (locked) return;
+                  if (c == w[pos]) {
+                    pos++;
+                    b.remove();
+                    sw();
+                    sTap();
+                    if (pos == w.length)
+                      return win(tt("Kamusnya hafal!", "Walking dictionary!"));
+                    if (i >= 60) {
+                      const l = $("#lt");
+                      shuf([...l.children]).forEach((x) => l.append(x));
+                    }
+                  } else
+                    lose(
+                      tt(
+                        "Salah huruf! Dasar tukang tebak \ud83d\ude1d",
+                        "Wrong letter! Guesser \ud83d\ude1d",
+                      ),
+                    );
+                };
+                $("#lt").append(b);
+              });
+              sw();
+            },
+            25 + w.length * 3,
+          );
+        },
+        hold: (i) => {
+          const N = 3 + Math.min(6, (i / 14) | 0);
+          return Zf(
+            i,
+            T2("Tahan!", "Hold on!"),
+            T2(
+              `Tekan dan TAHAN tombolnya selama ${N} detik.`,
+              `Press and HOLD the button for ${N} seconds.`,
+            ),
+            T2(
+              "Jangan lepas, apa pun kata monster.",
+              "Don’t let go, whatever the monster says.",
+            ),
+            () => {
+              st.innerHTML = o(
+                `<button class="b pk" id="hb2" style="touch-action:none">${ID() ? "TAHAN" : "HOLD"}</button>`,
+                50,
+                52,
+                0,
+              );
+              const b = $("#hb2");
+              let t1,
+                t2,
+                on = 0;
+              b.oncontextmenu = (e) => e.preventDefault();
+              const rel = () => {
+                if (!on || locked) return;
+                on = 0;
+                clearTimeout(t1);
+                clearTimeout(t2);
+                b.style.animation = "";
+                lose(
+                  tt(
+                    "Kamu lepas! Lemah banget \ud83d\ude06",
+                    "You let go! So weak \ud83d\ude06",
+                  ),
+                );
+              };
+              b.onpointerdown = (e) => {
+                if (locked || on) return;
+                on = 1;
+                b.setPointerCapture(e.pointerId);
+                if (i >= 30) b.style.animation = "sh .25s infinite";
+                say(tt("Tahan terus\u2026", "Keep holding\u2026"));
+                t1 = setTimeout(() => {
+                  on = 0;
+                  b.style.animation = "";
+                  win(tt("Jarimu baja!", "Fingers of steel!"));
+                }, N * 1000);
+                if (i >= 40)
+                  t2 = setTimeout(
+                    () =>
+                      say(
+                        tt(
+                          "Kamu boleh lepas sekarang. Beneran. \ud83d\ude08",
+                          "You can let go now. Really. \ud83d\ude08",
+                        ),
+                        "laugh",
+                      ),
+                    N * 600,
+                  );
+              };
+              b.onpointerup = rel;
+              b.onpointercancel = rel;
+              clean.push(() => {
+                clearTimeout(t1);
+                clearTimeout(t2);
+              });
+            },
+            N + 15,
+          );
+        },
+        rule: (i) => {
+          const k = i % 5,
+            nums = () =>
+              shuf(Array.from({ length: 30 }, (_, x) => x + 1)).slice(0, 5);
+          let ins,
+            labs,
+            ok,
+            nw = 0;
+          if (k == 0) {
+            labs = nums();
+            ok = labs.indexOf(Math.min(...labs));
+            ins = T2(
+              "Ketuk tombol dengan angka TERKECIL.",
+              "Tap the button with the SMALLEST number.",
+            );
+          } else if (k == 1) {
+            labs = nums();
+            ok = 3;
+            nw = 1;
+            ins = T2(
+              "Ketuk tombol KEDUA dari KANAN.",
+              "Tap the SECOND button from the RIGHT.",
+            );
+          } else if (k == 2) {
+            labs = shuf(["MERAH", "BIRU", "HIJAU", "KUNING", "MEJA"]);
+            ok = labs.indexOf("MEJA");
+            ins = T2(
+              "Ketuk kata yang BUKAN nama warna.",
+              "Tap the word that is NOT a color name.",
+            );
+          } else if (k == 3) {
+            labs = shuf(["KUCING", "BUAYA", "GAJAH", "HARIMAU", "KUDA"]);
+            ok = labs.indexOf("HARIMAU");
+            ins = T2("Ketuk kata TERPANJANG.", "Tap the LONGEST word.");
+          } else {
+            labs = nums().map((x) => (x == 5 ? 6 : x));
+            ok = (Math.random() * 5) | 0;
+            labs[ok] = 5;
+            nw = 1;
+            ins = T2(
+              "Ketuk tombol yang angkanya sama dengan JUMLAH tombol di layar.",
+              "Tap the button whose number equals how many buttons are on screen.",
+            );
+          }
+          return Zf(
+            i,
+            T2("Baca perintah", "Read the rule"),
+            ins,
+            T2(
+              "Baca perintahnya pelan-pelan. Jangan terburu-buru.",
+              "Read the rule slowly. Don’t rush.",
+            ),
+            () => {
+              st.innerHTML =
+                `<div class="rw ${nw ? "nw" : ""}">` +
+                labs
+                  .map(
+                    (x, j) =>
+                      `<button class="b ${["pk", "cy", "or", "sk", "gr"][j]}" data-j="${j}">${x}</button>`,
+                  )
+                  .join("") +
+                "</div>";
+              $$(".rw .b").forEach(
+                (b) =>
+                  (b.onclick = () =>
+                    +b.dataset.j == ok
+                      ? win(tt("Teliti banget!", "So careful!"))
+                      : lose(
+                          tt(
+                            "Kamu nggak baca perintahnya, ya? \ud83e\udd28",
+                            "You didn’t read the rule, did you? \ud83e\udd28",
+                          ),
+                        )),
+              );
+            },
+            25,
+          );
+        },
+      };
+      const KK = [
+        "riddle",
+        "seq",
+        "stroop",
+        "odd",
+        "memory",
+        "riddle",
+        "timing",
+        "scramble",
+        "math",
+        "hold",
+        "riddle",
+        "rule",
+        "tap",
+        "opp",
+        "riddle",
+        "drag",
+        "still",
+      ];
+      for (let i = 11; i <= 100; i++) {
+        const t = KK[(i - 11) % KK.length];
+        L.push(t == "riddle" ? rid(i) : MK[t] ? MK[t](i) : old(i, t));
+      }
+      let DB = null,
+        SM = null,
+        UID = null,
+        PN;
+      S.rc =
+        S.rc ||
+        Array.from(
+          { length: 6 },
+          () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[(Math.random() * 32) | 0],
+        ).join("");
+      save();
+      const lnk = () =>
+          "https://claude.ai/artifact/EvSmjn3SbcT4FQGbMGFgWp#r-" + S.rc,
+        hd = (a, b) => {
+          let n = 0;
+          for (let i = 0; i < a.length; i++) if (a[i] != b[i]) n++;
+          return n;
+        };
+      async function dh(f) {
+        const im = await createImageBitmap(f),
+          c = document.createElement("canvas");
+        c.width = 9;
+        c.height = 8;
+        const x = c.getContext("2d");
+        x.drawImage(im, 0, 0, 9, 8);
+        const d = x.getImageData(0, 0, 9, 8).data,
+          g = (i) => d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11;
+        let b = "";
+        for (let r = 0; r < 8; r++)
+          for (let k = 0; k < 8; k++) {
+            const i = (r * 9 + k) * 4;
+            b += g(i) > g(i + 4) ? "1" : "0";
+          }
+        return b;
+      }
+      async function chkProof(f) {
+        if (!/^image\//.test(f.type))
+          return { msg: "Please choose an image file." };
+        if (f.size > 6e6) return { msg: "Image is too big (max 6 MB)." };
+        let h;
+        try {
+          h = await dh(f);
+        } catch (e) {
+          return { msg: "Could not read that image." };
+        }
+        if ((S.hs || []).some((x) => hd(x, h) <= 6))
+          return { msg: "You already used this photo! Nice try 😈" };
+        if (DB) {
+          try {
+            const sn = await DB.collection("proofs").get();
+            if (sn.docs.some((d) => hd(d.id, h) <= 6))
+              return {
+                msg: "This photo was already used by someone else! Nice try 😈",
+              };
+          } catch (e) {}
+        }
+        if (SM) {
+          try {
+            const l = await SM.limits();
+            if (l.images) {
+              const r = await SM.json(
+                'Check this screenshot. Does it show the Instagram profile of the account "_atenntxs" with the viewer currently FOLLOWING it (button reads Following or Mengikuti)? Reply ONLY JSON: {"ok":true or false,"reason":"short reason in Indonesian"}',
+                { images: [f], modelTier: "quick", cache: false },
+              );
+              if (!r || !r.ok)
+                return {
+                  msg:
+                    tr("Verification failed:") + " " + ((r && r.reason) || "?"),
+                };
+            }
+          } catch (e) {}
+        }
+        S.hs = [...(S.hs || []), h];
+        save();
+        if (DB)
+          DB.doc("proofs/" + h)
+            .set({ u: UID || "", t: Date.now() })
+            .catch(() => {});
+        return { ok: 1 };
+      }
+      function proofModal() {
+        modal(
+          `<div class='mascot'>${mon()}</div><h2>Upload follow proof</h2><p>Send a screenshot showing you follow @_atenntxs. The system checks it’s new and real.</p><input type='file' id='pf' accept='image/*'><button class='b pk wide' data-a='sendp'>📤 Send proof</button><button class='b or wide' data-go='menu'>Menu</button>`,
+        );
+      }
+      function unf() {
+        modal(
+          `<div class='mascot'>${mon("laugh")}</div><h2>🚨 Unfollow detected!</h2><p>Our system detected that you UNFOLLOWED @_atenntxs! Upload new proof or lose a life.</p><input type='file' id='pf' accept='image/*'><button class='b pk wide' data-a='unfs'>📤 Send new proof</button><button class='b or wide' data-a='unfn'>I did NOT unfollow!</button>`,
+        );
+      }
+      async function regRef() {
+        const m = /^#r-([A-Z0-9]{6})$/.exec(location.hash);
+        if (!m || !DB || !UID || S.ref || m[1] == S.rc) return;
+        try {
+          const o = await DB.doc("refs/" + m[1]).get();
+          if (o.exists && o.data().o == UID) return;
+          await DB.doc("refs/" + m[1] + "/friends/" + UID).set({
+            t: Date.now(),
+          });
+          S.ref = m[1];
+          save();
+          toast("Joined through a friend’s invite! 🎉");
+        } catch (e) {}
+      }
+      async function checkRefs(m) {
+        if (!DB) {
+          if (m) toast("Friend tracking unavailable here");
+          return;
+        }
+        try {
+          const sn = await DB.collection("refs/" + S.rc + "/friends").get(),
+            n = sn.size - (S.fr || 0);
+          if (n > 0) {
+            S.fr = sn.size;
+            S.big = (S.big || 0) + 3 * n;
+            S.dead = 0;
+            S.nx = 0;
+            save();
+            modal(
+              `<div class='mascot'>${mon("shock")}</div><h2>Your friend logged in!</h2><p>${tr("Lives added:")} ${3 * n} ❤️</p><button class='b pk wide' data-a='again'>Continue</button>`,
+            );
+          } else if (m) {
+            toast("No new friends yet");
+            if ($("#rs2"))
+              $("#rs2").textContent = tr("Friends joined:") + " " + (S.fr || 0);
+          }
+        } catch (e) {
+          if (m) toast("Could not check friends");
+        }
+      }
+      (async () => {
+        try {
+          if (typeof claude == "undefined") return;
+          DB = await claude.use("db");
+          SM = await claude.use("sample");
+          const u = await claude.use("user");
+          UID = u ? await u.id() : null;
+          if (DB && UID)
+            DB.doc("refs/" + S.rc)
+              .set({ o: UID })
+              .catch(() => {});
+          await regRef();
+          checkRefs();
+        } catch (e) {}
+      })();
+      const E = (a, y, b) =>
+          `<circle cx='${a}' cy='${y}' r='3' fill='#2b1b54' stroke='none'/><circle cx='${b}' cy='${y}' r='3' fill='#2b1b54' stroke='none'/>`,
+        CP = "M26 76a17 17 0 0 1 0-34a24 24 0 0 1 45-6a19 19 0 0 1 5 40z";
+      const SV = {
+        "☀": `<path d='M50 6v12M50 82v12M6 50h12M82 50h12M19 19l9 9M72 72l9 9M81 19l-9 9M28 72l-9 9'/><circle cx='50' cy='50' r='24' fill='#ffd93d'/>${E(41, 46, 59)}<path d='M41 58q9 8 18 0'/>`,
+        "☁": `<path d='${CP}' fill='#fff'/>${E(40, 58, 60)}<path d='M43 67q7 6 14 0'/>`,
+        "🌥": `<path d='${CP}' fill='#b9c8e6'/><path d='M36 84l-3 9M52 84l-3 9M68 84l-3 9' stroke='#2f8cff'/>`,
+        "🏠": `<rect x='20' y='46' width='60' height='44' fill='#ff9ed2'/><path d='M10 50L50 14l40 36z' fill='#ff5f7a'/><rect x='43' y='62' width='15' height='28' fill='#ffd93d'/><rect x='27' y='56' width='12' height='12' fill='#bfe9ff'/>`,
+        "🌳": `<rect x='44' y='58' width='12' height='34' fill='#a0652d'/><circle cx='50' cy='38' r='28' fill='#4ccf6a'/><path d='M38 30q4-6 10-6' stroke='#fff' opacity='.6'/>`,
+        "🐘": `<ellipse cx='52' cy='58' rx='34' ry='26' fill='#b8c4d6'/><path d='M22 52q-14 4-10 26q3 6 8 0q-2-12 6-16z' fill='#b8c4d6'/><ellipse cx='58' cy='50' rx='12' ry='15' fill='#9fb0c8'/><circle cx='34' cy='48' r='3' fill='#2b1b54' stroke='none'/><rect x='38' y='76' width='10' height='15' fill='#b8c4d6'/><rect x='64' y='76' width='10' height='15' fill='#b8c4d6'/>`,
+        "🐜": `<path d='M24 70l-6 16M36 70l2 16M52 66l-2 20M80 44l8-14M70 44l-4-14'/><ellipse cx='28' cy='60' rx='14' ry='11' fill='#5a3a2a'/><ellipse cx='54' cy='58' rx='10' ry='9' fill='#5a3a2a'/><circle cx='76' cy='52' r='10' fill='#5a3a2a'/><circle cx='79' cy='50' r='2' fill='#fff' stroke='none'/>`,
+        "🚪": `<rect x='24' y='10' width='52' height='82' rx='8' fill='#c9803f'/><rect x='32' y='20' width='36' height='28' rx='4' fill='#e0a060' stroke-width='3'/><rect x='32' y='56' width='36' height='28' rx='4' fill='#e0a060' stroke-width='3'/><circle cx='66' cy='52' r='4' fill='#ffd93d'/>`,
+        "🔑": `<rect x='46' y='44' width='42' height='12' rx='3' fill='#ffd93d'/><rect x='72' y='56' width='8' height='12' fill='#ffd93d'/><rect x='84' y='56' width='6' height='9' fill='#ffd93d'/><circle cx='32' cy='50' r='18' fill='#ffd93d'/><circle cx='32' cy='50' r='7' fill='#fff'/>`,
+        "⭐": `<path d='M50 8l12 27 29 3-22 19 7 29-26-15-26 15 7-29L9 38l29-3z' fill='#ffd93d'/>${E(42, 52, 58)}<path d='M43 62q7 6 14 0'/>`,
+        "👾": `<path d='M18 36L26 8l16 20zM82 36L74 8 58 28z' fill='#ff7eb6'/><ellipse cx='50' cy='58' rx='38' ry='34' fill='#7c4dff'/><circle cx='36' cy='50' r='9' fill='#fff'/><circle cx='64' cy='50' r='9' fill='#fff'/><circle cx='38' cy='51' r='4' fill='#2b1b54' stroke='none'/><circle cx='62' cy='51' r='4' fill='#2b1b54' stroke='none'/><path d='M34 70q16 12 32 0z' fill='#2b1b54'/>`,
+        "🧘": `<ellipse cx='50' cy='80' rx='36' ry='11' fill='#7c4dff'/><path d='M32 80q18-46 36 0z' fill='#35d6ed'/><circle cx='50' cy='30' r='16' fill='#ffd9b0'/><path d='M42 30h6M52 30h6M44 38q6 4 12 0'/>`,
+        "🗿": `<path d='M28 90V30a22 22 0 0 1 44 0v60z' fill='#a9a9b8'/><path d='M36 44h10M54 44h10M50 46v14h6M40 76h20'/>`,
+        "🧱": `<rect x='8' y='26' width='84' height='48' fill='#e8654a'/><path d='M8 42h84M8 58h84M36 26v16M64 26v16M22 42v16M50 42v16M78 42v16M36 58v16M64 58v16' stroke-width='3'/>`,
+        "🪨": `<path d='M14 80q-6-30 20-44q18-12 36 0q22 14 16 44z' fill='#9a9aa6'/><path d='M36 52q6-6 12-2'/>`,
+        "🐢": `<ellipse cx='46' cy='56' rx='32' ry='24' fill='#4ccf6a'/><path d='M30 58h32M46 34v44' stroke-width='3'/><circle cx='82' cy='54' r='11' fill='#7ee27e'/><circle cx='85' cy='51' r='2' fill='#2b1b54' stroke='none'/><rect x='24' y='74' width='12' height='14' fill='#7ee27e'/><rect x='56' y='74' width='12' height='14' fill='#7ee27e'/>`,
+        "🪟": `<rect x='14' y='10' width='72' height='80' rx='6' fill='#bfe9ff'/><path d='M50 10v80M14 50h72'/>`,
+        "💡": `<path d='M50 8a28 28 0 0 0-14 52v10h28V60A28 28 0 0 0 50 8z' fill='#ffe27a'/><rect x='38' y='72' width='24' height='10' fill='#9a9aa6'/><rect x='42' y='84' width='16' height='8' fill='#9a9aa6'/>`,
+        "🪴": `<path d='M50 62C30 50 30 24 50 12c20 12 20 38 0 50z' fill='#4ccf6a'/><path d='M50 62V28' stroke-width='3'/><path d='M30 62h40l-6 28H36z' fill='#d9733f'/>`,
+        "🐈": `<path d='M84 70q10-8 4-24'/><ellipse cx='50' cy='70' rx='30' ry='20' fill='#ff9248'/><path d='M30 28l2 16 14-6zM70 28l-2 16-14-6z' fill='#ff9248'/><circle cx='50' cy='46' r='22' fill='#ff9248'/>${E(41, 44, 59)}<path d='M46 54l4 3 4-3M50 57v4'/>`,
+        "🎁": `<rect x='14' y='40' width='72' height='50' fill='#ff7eb6'/><rect x='8' y='28' width='84' height='16' fill='#ff5f9e'/><rect x='44' y='28' width='12' height='62' fill='#ffd93d'/><path d='M50 28c-14-18-26-6-14 0zM50 28c14-18 26-6 14 0z' fill='#ffd93d'/>`,
+        "🍎": `<path d='M50 32C28 14 10 40 22 66c8 18 22 22 28 16c6 6 20 2 28-16C90 40 72 14 50 32z' fill='#ff4d4d'/><path d='M50 32q0-14 10-22'/>`,
+        "🍅": `<ellipse cx='50' cy='58' rx='38' ry='32' fill='#ff4d4d'/><path d='M50 30l-9 8 9-3 9 3z' fill='#4ccf6a'/>`,
+        "😀": `<circle cx='50' cy='50' r='40' fill='#ffd93d'/>${E(36, 40, 64)}<path d='M28 56q22 26 44 0z' fill='#fff'/>`,
+        "😃": `<circle cx='50' cy='50' r='40' fill='#ffd93d'/><circle cx='36' cy='40' r='5' fill='#2b1b54' stroke='none'/><circle cx='64' cy='40' r='5' fill='#2b1b54' stroke='none'/><path d='M28 56q22 26 44 0z' fill='#fff'/>`,
+        "🐶": `<circle cx='50' cy='52' r='30' fill='#d9a066'/><ellipse cx='22' cy='46' rx='10' ry='20' fill='#8a5a2b'/><ellipse cx='78' cy='46' rx='10' ry='20' fill='#8a5a2b'/>${E(40, 48, 60)}<ellipse cx='50' cy='62' rx='8' ry='6' fill='#2b1b54'/>`,
+        "🐕": `<circle cx='50' cy='52' r='30' fill='#d9a066'/><ellipse cx='22' cy='46' rx='10' ry='20' fill='#8a5a2b'/><ellipse cx='78' cy='46' rx='10' ry='20' fill='#d9a066'/>${E(40, 48, 60)}<ellipse cx='50' cy='62' rx='8' ry='6' fill='#2b1b54'/>`,
+        "🌕": `<circle cx='50' cy='50' r='40' fill='#fff3b0'/><circle cx='34' cy='38' r='6' fill='#f0dc80' stroke-width='2'/><circle cx='64' cy='64' r='8' fill='#f0dc80' stroke-width='2'/>`,
+        "🌝": `<circle cx='50' cy='50' r='40' fill='#fff3b0'/>${E(38, 44, 62)}<path d='M38 62q12 10 24 0'/><circle cx='64' cy='70' r='5' fill='#f0dc80' stroke-width='2'/>`,
+        "🕐": `<circle cx='50' cy='50' r='40' fill='#fff'/><path d='M50 50V20M50 50l10-17'/>`,
+        "🕑": `<circle cx='50' cy='50' r='40' fill='#fff'/><path d='M50 50V20M50 50l17-10'/>`,
+        "🔵": `<circle cx='50' cy='50' r='38' fill='#4a90ff'/>`,
+        "🟦": `<rect x='12' y='12' width='76' height='76' rx='16' fill='#4a90ff'/>`,
+        "🏞": `<rect x='6' y='10' width='88' height='80' rx='8' fill='#bfe9ff'/><path d='M6 80q24-30 44-8q20-22 44 8v10H6z' fill='#4ccf6a'/><circle cx='70' cy='30' r='10' fill='#ffd93d'/>`,
+        "🎉": `<path d='M14 90l16-46 30 30z' fill='#ff7eb6'/><path d='M44 26l4-14M60 36l12-8M66 52l16 2'/><circle cx='70' cy='16' r='4' fill='#35d6ed'/><circle cx='86' cy='34' r='4' fill='#ffd93d'/><circle cx='80' cy='64' r='4' fill='#7c4dff'/>`,
+      };
+      const sv = (i) =>
+        `<svg viewBox='0 0 100 100' style='width:1em;height:1em;display:block;overflow:visible' stroke='#2b1b54' stroke-width='4' stroke-linejoin='round' stroke-linecap='round' fill='none'>${i}</svg>`;
+      function skin() {
+        $$("#stage .o,#stage .cat,#stage .eg span").forEach((e) => {
+          if (e.children.length) return;
+          const k = e.textContent.replace(/\uFE0F/g, "").trim();
+          if (SV[k]) e.innerHTML = sv(SV[k]);
+        });
+      }
+      new MutationObserver(skin).observe($("#stage"), {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+      const IC = {
+        h: `<path d='M50 88C12 60 6 34 22 22c12-8 25 0 28 11c3-11 16-19 28-11c16 12 10 38-28 66z' fill='#ff4d6d'/><path d='M28 34q4-7 11-7' stroke='#fff' opacity='.7'/>`,
+        hx: `<path d='M50 88C12 60 6 34 22 22c12-8 25 0 28 11c3-11 16-19 28-11c16 12 10 38-28 66z' fill='#d9d2e9'/>`,
+        c: `<circle cx='50' cy='50' r='38' fill='#ffd93d'/><circle cx='50' cy='50' r='25' fill='#ffc400' stroke-width='4'/><path d='M50 34l5 12 13 1-10 8 3 13-11-7-11 7 3-13-10-8 13-1z' fill='#fff2a8' stroke-width='3'/>`,
+        s: `<path d='M50 8l12 27 29 3-22 19 7 29-26-15-26 15 7-29L9 38l29-3z' fill='#ffd93d'/>`,
+        b: `<path d='M50 8a28 28 0 0 0-14 52v10h28V60A28 28 0 0 0 50 8z' fill='#ffe27a'/><rect x='38' y='74' width='24' height='10' fill='#9a9aa6'/>`,
+        p: `<rect x='22' y='14' width='20' height='72' rx='6' fill='#7c4dff'/><rect x='58' y='14' width='20' height='72' rx='6' fill='#7c4dff'/>`,
+        t: `<circle cx='50' cy='56' r='34' fill='#fff'/><path d='M50 56V34M50 56l14 8M40 12h20' />`,
+      };
+      const ic = (n) =>
+        `<svg viewBox='0 0 100 100' style='width:1.15em;height:1.15em;vertical-align:-.2em;overflow:visible' stroke='#2b1b54' stroke-width='6' stroke-linejoin='round' stroke-linecap='round' fill='none'>${IC[n]}</svg>`;
+      function icons() {
+        $$("[data-ic]").forEach((e) => (e.innerHTML = ic(e.dataset.ic)));
+      }
+      const bsv = (vb, i) =>
+          `<svg viewBox='${vb}' preserveAspectRatio='none' style='width:100%;height:100%;display:block' stroke='#2b1b54' stroke-width='3' stroke-linejoin='round' stroke-linecap='round' fill='none'>${i}</svg>`,
+        DR = `<rect x='3' y='3' width='58' height='94' rx='6' fill='#c9803f'/><rect x='10' y='11' width='44' height='34' rx='4' fill='#e0a060' stroke-width='2'/><rect x='10' y='53' width='44' height='36' rx='4' fill='#e0a060' stroke-width='2'/><circle cx='51' cy='52' r='4.5' fill='#ffd93d'/>`,
+        DBK = `<rect x='3' y='3' width='58' height='94' rx='6' fill='#bfe9ff'/><circle cx='42' cy='32' r='10' fill='#ffd93d'/><path d='M3 78q16-22 30-6q16-14 28 4V94q0 3-3 3H6q-3 0-3-3z' fill='#4ccf6a'/><rect x='3' y='3' width='58' height='94' rx='6' stroke-width='5'/>`;
+      const doorHTML = (id, x, y, w, h) =>
+        `<div class='o dr' id='${id}' style='left:${x}%;top:${y}%;width:${w}cqmin;height:${h}cqmin;perspective:${w * 3}cqmin'><div class='dback'>${bsv("0 0 64 100", DBK)}</div><div class='dpanel' id='${id}p'>${bsv("0 0 64 100", DR)}</div></div>`;
+      function openDoor(id) {
+        const p = $("#" + id + "p");
+        p.style.transition = "transform .9s cubic-bezier(.25,1.3,.5,1)";
+        p.style.transform = "rotateY(-108deg)";
+        beep(160, 0.35, "sawtooth", 0.05);
+        beep(260, 0.2, "square", 0.04, 0.3);
+      }
+      const HILL = `<path d='M0 74Q22 58 48 72T100 66V100H0Z' fill='#9be8a8' stroke='#2b1b54' stroke-width='.7'/><path d='M0 88Q30 74 60 86T100 80V100H0Z' fill='#5ccf7a' stroke='#2b1b54' stroke-width='.7'/>`,
+        ROOM = `<rect width='100' height='72' fill='#ffeaf4'/><g fill='#ffd0e6'>${Array.from({ length: 6 }, (_, i) => `<rect x='${i * 18 + 4}' width='9' height='72'/>`).join("")}</g><rect y='72' width='100' height='28' fill='#e2a869'/><path d='M0 72H100M0 82H100M0 92H100M25 72v10M60 82v10M40 92v8' stroke='#2b1b54' stroke-width='.7' fill='none'/>`,
+        SC = { 1: HILL, 3: HILL, 5: ROOM, 6: HILL, 10: ROOM },
+        scn = (k) =>
+          `<svg viewBox='0 0 100 100' preserveAspectRatio='none' style='position:absolute;inset:0;width:100%;height:100%;pointer-events:none'>${k}</svg>`;
+      let lastAct = Date.now(),
+        NP = 0;
+      document.addEventListener("pointerdown", () => (lastAct = Date.now()));
+      function rate() {
+        modal(
+          `<div class='mascot'>${mon("shock")}</div><h2>Enjoying the game?</h2><p>Please rate us!</p><div class='row' id='stz'></div><button class='b or sm' id='nt' data-a='later2'>Maybe later</button>`,
+        );
+        const z = $("#stz"),
+          draw = () => {
+            z.innerHTML = "";
+            shuf([1, 2, 3, 4, 5]).forEach((k) => {
+              const b = document.createElement("button");
+              b.className = "b";
+              b.innerHTML = ic("s") + k;
+              b.onclick = () => {
+                if (k == 5) {
+                  toast("Thank you! \ud83e\udd70");
+                  A.pend();
+                } else {
+                  toast(
+                    tt(
+                      "Cuma bintang 5 yang diterima! \ud83d\ude24",
+                      "Only 5 stars accepted! \ud83d\ude24",
+                    ),
+                  );
+                  draw();
+                }
+              };
+              z.append(b);
+            });
+          };
+        draw();
+      }
+      function offline() {
+        modal(
+          `<div class='mascot'>${mon("laugh")}</div><h2>Connection lost</h2><p>Reconnecting\u2026</p><div class='prog' style='width:100%'><i style='width:100%;animation:rn .6s linear infinite;background:repeating-linear-gradient(45deg,#ff9248 0 10px,#ff7eb6 10px 20px)'></i></div>`,
+        );
+        setTimeout(() => {
+          if ($("#modal").className) A.pend();
+        }, 3200);
+      }
+      function fakeLoad(cb) {
+        modal(
+          `<div class='mascot'>${mon()}</div><h2>Loading level\u2026</h2><div class='prog' style='width:100%'><i id='fl' style='width:0;transition:width 2s linear'></i></div><p id='flt'>0%</p>`,
+        );
+        setTimeout(() => {
+          const e = $("#fl");
+          if (e) e.style.width = "99%";
+        }, 60);
+        let p = 0;
+        const iv = setInterval(() => {
+          const e = $("#flt");
+          if (!e) return clearInterval(iv);
+          p = Math.min(99, p + 7 + ((Math.random() * 9) | 0));
+          e.textContent = p + "%";
+        }, 180);
+        setTimeout(() => {
+          const e = $("#flt");
+          if (e)
+            e.textContent = tt(
+              "99%\u2026 masih 99%\u2026 \ud83d\ude08",
+              "99%\u2026 still 99%\u2026 \ud83d\ude08",
+            );
+        }, 2400);
+        setTimeout(() => {
+          if ($("#fl")) cb();
+        }, 4000);
+      }
+      st.addEventListener("pointerover", (e) => {
+        if (cur < 45 || locked || e.pointerType != "mouse") return;
+        const b = e.target.closest && e.target.closest(".opts .b,.g4 .b");
+        if (b && Math.random() < 0.3) {
+          const q = b.parentNode;
+          q.insertBefore(
+            b,
+            q.children[(Math.random() * q.children.length) | 0],
+          );
+        }
+      });
+      $$("#menu .m0").forEach(
+        (m) =>
+          (m.onclick = () => {
+            toast(
+              pick([
+                tt("Jangan colek-colek!", "Stop poking me!"),
+                tt("Hei! Itu perutku!", "Hey! That\u2019s my belly!"),
+                tt(
+                  "Colek lagi, kugigit! \ud83d\ude24",
+                  "Poke again and I bite! \ud83d\ude24",
+                ),
+                tt("Aduh! Kamu nggak sopan!", "Ouch! How rude!"),
+              ]),
+            );
+          }),
+      );
+      function menuShuffle() {
+        const od = shuf([1, 2, 3]);
+        $("[data-a=play]").style.order = od[0];
+        $$("#menu .row").forEach((r, k) => (r.style.order = od[k + 1]));
+      }
+      function captcha() {
+        const cat = "\ud83d\udc08",
+          pool = shuf(Object.keys(SV).filter((k) => k != cat)).slice(0, 8),
+          cells = shuf([cat, ...pool]);
+        modal(
+          `<h2>Verify you\u2019re human</h2><p>Select all squares with a CAT</p><div class='cg' id='cg'></div><button class='b pk wide' data-a='vf'>Verify</button>`,
+        );
+        const g = $("#cg");
+        cells.forEach((k) => {
+          const b = document.createElement("button");
+          b.className = "cc";
+          b.innerHTML = sv(SV[k]);
+          b.onclick = () => b.classList.toggle("sel");
+          g.append(b);
+        });
+      }
+      function gift() {
+        if (A.gf || !$("#menu").classList.contains("on")) return;
+        A.gf = 1;
+        modal(
+          `<div class='mascot'>${mon("shock")}</div><h2>Daily login gift!</h2><p>Claim 1000 free coins!</p><button class='b pk wide' id='cl' data-a='claim'>CLAIM</button><button class='b or sm' data-a='close'>No thanks</button>`,
+        );
+      }
+      $$("#menu .logo").forEach(
+        (l) =>
+          (l.onclick = () =>
+            toast(
+              tt(
+                "Jangan diketuk, itu cuma gambar!",
+                "Don\u2019t tap it, it\u2019s just a picture!",
+              ),
+            )),
+      );
+      {
+        let w = 4;
+        setInterval(() => {
+          const sp = $("#splash");
+          if (!sp.classList.contains("on")) return;
+          w += 3 + Math.random() * 6;
+          if (w >= 100) {
+            w = 4;
+            $("#splash p").textContent = pick([
+              tt(
+                "Beneran, ini game santai. Percaya aja.",
+                "Seriously, it\u2019s a chill game. Trust me.",
+              ),
+              tt(
+                "Memuat\u2026 eh, ulang dulu ya.",
+                "Loading\u2026 oops, restarting.",
+              ),
+              tt(
+                "Ketuk untuk mulai. Atau jangan, terserah.",
+                "Tap to start. Or don\u2019t, whatever.",
+              ),
+            ]);
+          }
+          $("#spb").style.width = w + "%";
+        }, 140);
+      }
+      go("splash");
+      ach();
+    </script>
+  </body>
+</html>
