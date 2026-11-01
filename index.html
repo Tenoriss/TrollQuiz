@@ -1869,8 +1869,16 @@
           }
           save();
           hud();
+          const vagueHints = [
+            "Yang terlihat jelas biasanya bukan jawabannya.",
+            "Jangan percaya benda yang paling minta perhatian.",
+            "Perhatikan perubahan kecil. Troll suka menyembunyikan yang penting.",
+            "Kalau terasa terlalu mudah, kemungkinan kamu sedang dijebak.",
+            "Coba cara yang tidak akan kamu pilih pada percobaan pertama.",
+            "Jawaban yang benar mungkin tidak terlihat seperti jawaban.",
+          ];
           modal(
-            `<div class="mascot">${mon("shock")}</div><h2>Hint</h2><p>${tl ? tr("Hint: try harder. You’re welcome!") : f(L[cur - 1].h)}</p><button class="b pk" data-a="close" data-v="1">Got it</button>`,
+            `<div class="mascot">${mon("shock")}</div><h2>Hint</h2><p>${tl ? tr("Hint: try harder. You’re welcome!") : vagueHints[(cur + hu) % vagueHints.length]}</p><button class="b pk" data-a="close" data-v="1">Got it</button>`,
           );
         },
         rot() {
@@ -4085,12 +4093,17 @@
         if (number !== 10 && number !== 100) {
           const subject = SPEC_SUBJECTS[index];
           level.t = `${SPEC_TASKS[index % SPEC_TASKS.length].replace("{x}", subject)} #${number}`;
-          const originalInstruction = level.i;
           level.i = () =>
-            `${SPEC_TASKS[(index + 3) % SPEC_TASKS.length].replace("{x}", subject)} ${f(originalInstruction)} (Level ${number}/100)`;
-          const originalHint = level.h;
+            `${SPEC_TASKS[(index + 3) % SPEC_TASKS.length].replace("{x}", subject)} (Level ${number}/100)`;
           level.h = () =>
-            `Trik untuk misi ${subject}: ${f(originalHint)} Jangan menyerah pada troll.`;
+            [
+              "Yang paling mencolok belum tentu penting.",
+              "Troll menyukai gerakan yang terlalu terburu-buru.",
+              "Coba lihat hubungan antar benda, bukan bentuknya.",
+              "Jangan ulangi tindakan yang baru saja membuatmu malu.",
+              "Ada detail kecil yang sengaja dibuat membosankan.",
+              "Kalau semua terlihat masuk akal, curigai semuanya.",
+            ][index % 6];
         }
       });
       const MAX_LEVELS = L.length;
